@@ -1,0 +1,16 @@
+# A cut-down copy of upstream criteria/baseline_criteria.yml.
+_metadata:
+  total_controls: 2
+baseline-1:
+  General:
+    Controls:
+      osps_ac_01_01:
+        category: MUST
+        description: When a user attempts to modify a sensitive resource, the system MUST require MFA.
+        original_id: OSPS-AC-01.01
+        na_allowed: true
+      osps_le_03_01:
+        category: MUST
+        description: The license MUST be in a standard location.
+        original_id: OSPS-LE-03.01
+        met_url_required: true

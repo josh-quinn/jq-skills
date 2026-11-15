@@ -1,0 +1,40 @@
+# A cut-down copy of upstream criteria/criteria.yml, in the same !!omap shape.
+--- !!omap
+- '0': !!omap
+  - Basics: !!omap
+    - Basic project website content: !!omap
+      - description_good:
+          category: MUST
+      - contribution:
+          category: MUST
+          met_url_required: true
+    - Documentation: !!omap
+      - documentation_basics:
+          category: MUST
+          na_allowed: true
+      - old_thing:
+          category: MUST
+          obsolete: true
+  - Security: !!omap
+    - Secure development knowledge: !!omap
+      - know_secure_design:
+          category: MUST
+      - crypto_pfs:
+          category: SHOULD
+          na_allowed: true
+          na_justification_required: true
+      - static_analysis:
+          category: MUST
+          na_allowed: true
+          met_justification_required: true
+      - test_most:
+          category: SUGGESTED
+      - coming_soon:
+          category: MUST
+          future: true
+- '1': !!omap
+  - Basics: !!omap
+    - Project oversight: !!omap
+      - governance:
+          category: MUST
+          met_url_required: true
