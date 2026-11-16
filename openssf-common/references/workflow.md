@@ -1,8 +1,9 @@
 # The badge workflow (every level)
 
 Every openssf-* skill follows these phases. The level skill adds what is specific to its level.
-`$B` below means the helper, `uv run --with pyyaml python -I <openssf-common>/scripts/badge.py`.
-If `uv` isn't installed, use `python3 -I <openssf-common>/scripts/badge.py` with PyYAML available.
+`$B` below means the helper, `uv run --no-project --with pyyaml python -I <openssf-common>/scripts/badge.py`.
+Keep `--no-project`: without it, `uv` run inside a Python repo attaches to that project and
+leaves `.venv/` and `uv.lock` in the repo you're assessing. If `uv` isn't installed, use `python3 -I <openssf-common>/scripts/badge.py` with PyYAML available.
 
 There are two pauses where you stop and wait for the user. Don't merge or skip them, even when
 the work looks obvious. The first pause hands over decisions only the user can make. The

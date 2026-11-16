@@ -6,7 +6,7 @@ work folder, drafts the gap table, checks an answers file against the criteria's
 rules, and builds bestpractices.dev "automation proposal" URLs from it.
 
 Run it with PyYAML available, e.g.:
-    uv run --with pyyaml python -I badge.py <command> --help
+    uv run --no-project --with pyyaml python -I badge.py <command> --help
 """
 
 from __future__ import annotations

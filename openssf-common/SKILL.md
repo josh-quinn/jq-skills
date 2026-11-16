@@ -18,9 +18,9 @@ when it points here.
 | `references/site.md` | Criteria sources, project JSON, proposal URLs, form mechanics, the site's automation, and Claude in Chrome caveats. Read it before phase 4, or when the site surprises you. |
 | `scripts/badge.py` | Helper: `config`, `init`, `list`, `gaps`, `check`, `urls`, `payload`, `project`. Run `--help` on any command. |
 | `scripts/fill-form.js` | Fallback filler for the edit form, for when proposal URLs don't work. |
-| `tests/` | The helper's tests: `uv run --with pyyaml --with pytest pytest <this folder>/tests` |
+| `tests/` | The helper's tests: `uv run --no-project --with pyyaml --with pytest pytest <this folder>/tests` |
 
-Run the helper as `uv run --with pyyaml python -I <this folder>/scripts/badge.py <command>`.
+Run the helper as `uv run --no-project --with pyyaml python -I <this folder>/scripts/badge.py <command>`.
 
 ## Settings
 
