@@ -578,5 +578,15 @@ def main(argv=None) -> int:
     return 0
 
 
+def cli(argv=None) -> int:
+    """main(), treating a reader that closed the pipe early (`| head`) as success."""
+    try:
+        return main(argv)
+    except BrokenPipeError:
+        # Point stdout at devnull so the interpreter's final flush doesn't fail again.
+        os.dup2(os.open(os.devnull, os.O_WRONLY), sys.stdout.fileno())
+        return 0
+
+
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(cli())

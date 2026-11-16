@@ -318,3 +318,13 @@ def test_cli_check_exits_non_zero_on_errors(criteria_dir, tmp_path, capsys):
     code = badge.main(["check", "--criteria", str(criteria_dir), str(f)])
     assert code == 1
     assert "description_good" in capsys.readouterr().out
+
+
+def test_cli_closed_pipe_is_not_an_error(monkeypatch):
+    # `badge.py list | head` closes stdout early; that isn't a failure.
+    def boom(argv=None):
+        raise BrokenPipeError
+
+    monkeypatch.setattr(badge, "main", boom)
+    monkeypatch.setattr(badge.os, "dup2", lambda *a: None)
+    assert badge.cli([]) == 0
