@@ -81,9 +81,6 @@ check "ask: Enter picks claude" "grep -q '^agent=claude' $tmp/called"
 
 # 5. No prompt where there's nothing new to set up.
 reset; write_cfg claude
-git init -q $tmp/r/g <<< "n" > /dev/null
-git init -q $tmp/r/g <<< "y" > /dev/null
-check "re-running init in an existing repo doesn't prompt" "[[ ! -e $tmp/called ]]"
 git init -q --bare $tmp/r/h.git <<< "y" > /dev/null
 check "bare repos don't prompt" "[[ ! -e $tmp/called ]]"
 write_cfg claude false
@@ -110,6 +107,31 @@ check "other commands pass through" "[[ $rc -eq 0 && ! -e $tmp/called ]]"
 print -n > $tmp/r/file
 git init -q $tmp/r/file <<< "y" > /dev/null 2>&1; rc=$?
 check "a failed init keeps git's exit code and doesn't prompt" "[[ $rc -ne 0 && ! -e $tmp/called ]]"
+
+# 8. Re-init: no record is treated as an existing repo to set up; with a record, the check runs.
+reset; write_cfg claude
+git init -q $tmp/r/g <<< "n" > /dev/null
+out=$(git init -q $tmp/r/g <<< "y" 2>&1)
+check "re-init without a record says so and offers setup" '[[ $out == *"No setup record"* ]]'
+check "  ...and the agent is told it's an existing repo" "grep -q '^arg=This is an existing git repository' $tmp/called"
+
+reset; write_cfg claude
+git init -q $tmp/r/m <<< "n" > /dev/null
+mkdir -p $tmp/r/m/.github && print "schema: 1" > $tmp/r/m/.github/repo-setup.yaml
+_gip_check() { print "PASS everything"; return 0 }
+out=$(git init -q $tmp/r/m <<< "y" 2>&1)
+check "record + passing check: report, no question, no agent" \
+  '[[ $out == *"PASS everything"* && $out == *"nothing to do"* && $out != *"[y/N]"* && ! -e $tmp/called ]]'
+
+_gip_check() { print "FAIL hooks  missing .githooks/pre-push"; return 1 }
+out=$(git init -q $tmp/r/m <<< "n" 2>&1)
+check "record + failing check: asks to fix" '[[ $out == *"Fix the failed checks"* && ! -e $tmp/called ]]'
+git init -q $tmp/r/m <<< "y" > /dev/null 2>&1
+check "  ...and yes gives the agent the failures" "grep -q 'arg=.*FAIL hooks  missing .githooks/pre-push.*fix only what failed' $tmp/called"
+
+_gip_check() { print "boom"; return 3 }
+out=$(git init -q $tmp/r/m <<< "y" 2>&1); rc=$?
+check "a check that can't run is reported, git still succeeds" '[[ $rc -eq 0 && $out == *"exit 3"* ]]'
 
 print
 (( fails == 0 )) && print "all passed" || { print "$fails failed"; exit 1 }

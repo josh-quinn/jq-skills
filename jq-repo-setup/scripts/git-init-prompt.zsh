@@ -1,6 +1,10 @@
-# git-init-prompt: after you run `git init` in an interactive zsh, offer to set the new repository
-# up with agent skills (jq-repo-setup first, then any others listed in the config), in Claude Code,
+# git-init-prompt: after you run `git init` in an interactive zsh, offer to set the repository up
+# with agent skills (jq-repo-setup first, then any others listed in the config), in Claude Code,
 # Copilot CLI or Antigravity. Git has no hook that runs on init, so this wraps the `git` command.
+#
+#   new repo                         ask, then start the agent with the skills
+#   re-init, no .github/repo-setup.yaml   the same, told it's an existing repo
+#   re-init, with that setup record   run check-setup.py; offer an agent only if something fails
 #
 # Source it from ~/.zshrc (scripts/install-shell.sh does that). Settings:
 #   ${JQ_TOOLS_CONFIG:-~/.config/jq-tools}/git-init-prompt/config.yaml (written on first use)
@@ -89,22 +93,59 @@ git() {
     target=
   fi
   command git "$@"; rc=$?
-  if [[ -n $target && $rc -eq 0 && $existed -eq 0 && -d $target/.git ]]; then
-    _gip_offer $target
+  if [[ -n $target && $rc -eq 0 && -d $target/.git ]]; then
+    if (( existed )); then _gip_review $target; else _gip_offer $target new; fi
   fi
   return $rc
 }
 
+# _gip_check <repo>: the read-only setup check (scripts/check-setup.py).
+_gip_check() {
+  local script=$_gip_skill_home/scripts/check-setup.py
+  if (( $+commands[uv] )); then
+    command uv run -q --no-project --with pyyaml python -I $script $1
+  else
+    command python3 -I $script $1
+  fi
+}
+
+_gip_allowed() {
+  case ${JQ_GIT_INIT_PROMPT:-} in
+    off|0|no) return 1 ;;
+    always) ;;
+    *) [[ -o interactive && -t 0 && -t 1 ]] || return 1 ;;
+  esac
+  local cfg=$(_gip_config)
+  [[ -f $cfg ]] || _gip_write_default $cfg || return 1
+  [[ $(_gip_read $cfg enabled) != false ]]
+}
+
+# A re-init: check a repo that has a setup record; treat one without as unset-up.
+_gip_review() {
+  emulate -L zsh
+  local target=$1 report rc
+  _gip_allowed || return 0
+  if [[ ! -f $target/.github/repo-setup.yaml ]]; then
+    print "No setup record (.github/repo-setup.yaml) in ${target:t}."
+    _gip_offer $target existing
+    return
+  fi
+  print "Checking ${target:t} against its setup record..."
+  report=$(_gip_check $target 2>&1); rc=$?
+  print -r -- $report
+  case $rc in
+    0) print "Still up to standard; nothing to do." ;;
+    1) _gip_offer $target failed $report ;;
+    *) print -u2 "git-init-prompt: the check couldn't run (exit $rc)" ;;
+  esac
+}
+
+# _gip_offer <repo> <new|existing|failed> [report]
 _gip_offer() {
   emulate -L zsh; setopt extended_glob
-  local target=$1 cfg=$(_gip_config) agent reply d s skill_dirs skills found missing prompt i
-  case ${JQ_GIT_INIT_PROMPT:-} in
-    off|0|no) return 0 ;;
-    always) ;;
-    *) [[ -o interactive && -t 0 && -t 1 ]] || return 0 ;;
-  esac
-  [[ -f $cfg ]] || _gip_write_default $cfg || return 0
-  [[ $(_gip_read $cfg enabled) == false ]] && return 0
+  local target=$1 mode=$2 report=${3:-} cfg agent reply d s skill_dirs skills found missing prompt i
+  _gip_allowed || return 0
+  cfg=$(_gip_config)
 
   skill_dirs=(${(f)"$(_gip_read $cfg skill_dirs)"})
   skill_dirs=(${skill_dirs/#\~/$HOME})
@@ -121,7 +162,11 @@ _gip_offer() {
   (( ${#found} )) || return 0
 
   local -a names=(${found:t})
-  print -n "Set up ${target:t} with ${(j:, then :)names}? [y/N] "
+  if [[ $mode == failed ]]; then
+    print -n "Fix the failed checks with ${(j:, then :)names}? [y/N] "
+  else
+    print -n "Set up ${target:t} with ${(j:, then :)names}? [y/N] "
+  fi
   read -r reply || return 0
   [[ $reply == [yY]* ]] || return 0
 
@@ -132,10 +177,15 @@ _gip_offer() {
     case ${reply:-1} in 1) agent=claude ;; 2) agent=copilot ;; 3) agent=antigravity ;; *) return 0 ;; esac
   fi
 
-  prompt="This is a new git repository. Use these skills in order, reading each skill's SKILL.md and following it:"
+  case $mode in
+    new) prompt="This is a new git repository." ;;
+    existing) prompt="This is an existing git repository with no setup record (.github/repo-setup.yaml). Assess what is already in place before changing anything." ;;
+    failed) prompt="This repository was set up before; .github/repo-setup.yaml records the answers. check-setup.py reports these results: <<< $report >>> Confirm the recorded answers still hold, then fix only what failed." ;;
+  esac
+  prompt+=" Use these skills in order, reading each skill's SKILL.md and following it:"
   i=1
   for d in $found; do prompt+=" $i. ${d:t} ($d/SKILL.md)."; (( i++ )); done
-  prompt+=" Start by asking me what you need to know about the project."
+  [[ $mode == failed ]] || prompt+=" Start by asking me what you need to know about the project."
 
   local -a dirs=(${(u)found:h})
   (
