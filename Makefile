@@ -1,6 +1,6 @@
 .PHONY: test check link unlink
 
-PY = uv run --with pyyaml --with pytest
+PY = uv run --no-project --with pyyaml --with pytest
 
 test:
 	$(PY) pytest -q openssf-common/tests
