@@ -8,6 +8,7 @@ from pathlib import Path
 
 import pytest
 
+sys.dont_write_bytecode = True  # keep __pycache__ out of the skill folder
 SCRIPT = Path(__file__).resolve().parents[1] / "jq-repo-setup" / "scripts" / "check-setup.py"
 spec = importlib.util.spec_from_file_location("check_setup", SCRIPT)
 cs = importlib.util.module_from_spec(spec)
