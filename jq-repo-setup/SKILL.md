@@ -164,6 +164,10 @@ repo or a token, pushing release tags, approving setting changes).
   saas-b2b, including containers, IaC, DAST, secrets and evidence for customers.
 - `references/lessons.md` - detailed pitfalls and their fixes.
 - `scripts/pin-actions.sh` - pin every GitHub Action in a repo to a commit SHA.
+- `scripts/git-init-prompt.zsh` - optional zsh wrapper: after the user types `git init`, it
+  offers to start Claude Code, Copilot CLI or Antigravity in the new repo with this skill (and any
+  others listed in `~/.config/jq-tools/git-init-prompt/config.yaml`). Not part of a setup run;
+  mention it only if the user asks to be offered setup on every new repo.
 - `assets/` - templates for docs, hooks, workflows (security, container scan/SBOM, and
   public-only CodeQL/Scorecard/dependency-review), Dependabot, Security Insights, and
   `scripts/aws-oidc-login.sh`, `sast-opengrep.yml` (Opengrep with pinned binary and rules),
