@@ -18,6 +18,8 @@ second comes before anything is published.
 
 1. Find the repository and its public URL: `git -C <repo> remote get-url origin`, written as
    `https://...` without `.git`. Use the repository's name as the project name.
+   If `.github/repo-setup.yaml` exists, read it: it holds answers already given (visibility,
+   project type, solo or team) and, under `badges.openssf`, the project's id and last level.
 2. `badge init --project <name> --level <level> --repo-url <url>`. This creates the work folder
    (`<data_dir>/<project>/<level>/`, where `data_dir` is set in
    `~/.config/jq-tools/openssf-badge-skills/config.yaml`), snapshots the live criteria into it,
@@ -104,6 +106,20 @@ Read site.md first. In outline:
 5. Report the percentage, whether the badge was earned, and what's left and why. Offer to add
    the badge to the README:
    `[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/<id>/badge)](https://www.bestpractices.dev/projects/<id>)`
+6. If the repo has a setup record, `.github/repo-setup.yaml` (left by jq-repo-setup), offer to
+   record the badge in it, in the same commit as the README badge:
+
+   ```yaml
+   badges:
+     openssf:
+       project_id: <id>
+       level: passing        # the level the site now shows: passing, silver or gold
+       date: <today>
+   ```
+
+   Update that section only; the rest of the file belongs to other skills. jq-repo-setup's
+   check reads it to confirm, later, that the site still shows that level. Don't create the
+   file if it isn't there.
 
 When testing a skill (evals, dry runs), stop after phase 3: never propose to or save on the
 real site.
