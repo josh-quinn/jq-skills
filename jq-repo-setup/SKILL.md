@@ -17,6 +17,26 @@ The point is proportion. A weekend CLI does not need a threat model and DAST; a 
 SaaS handling customer data does. Pick the profile first, then apply only what it calls
 for, and explain the choices so the owner can disagree.
 
+## Step 0: Has this repo been set up before?
+
+Look for `.github/repo-setup.yaml`, the record this skill leaves (template:
+`assets/repo-setup.yaml`). Then run the check, which changes nothing:
+
+    uv run --no-project --with pyyaml python -I <this skill>/scripts/check-setup.py <repo>
+
+It exits 0 when every check passes, 1 when some fail, and 2 when there is no record.
+
+- **No record (2)**: a first setup, or a repo set up some other way. Go on to Step 1; the
+  check's output shows what is already in place, so don't redo it.
+- **Record, all checks pass (0)**: tell the user it is still up to standard, list any warnings,
+  and stop unless they want a full review.
+- **Record, some checks fail (1)**: take Step 1's answers from the record and ask only whether
+  they still hold (a repo that went public, a second maintainer). Then fix only the failed
+  checks, in Step 3's order, and re-run the check.
+
+The record says what was decided; the check says what is true now. Trust the check: a record
+can go stale, so never skip work because the record says it was done.
+
 ## Step 1: Understand the project (ask only what you cannot infer)
 
 Inspect the directory first (`git status`, manifests such as `go.mod`, `package.json`,
@@ -48,8 +68,8 @@ in one short batch for anything you cannot infer:
 Write back a 4-6 line summary of the profile and what you will set up, and get a yes
 before creating files. That summary is the contract for the rest of the work; record it
 in the repo too (an ADR, or the top of `docs/security/controls.md` for saas-b2b) so the
-next person sees why choices were made. If the user has already stated the answers, say
-so in the summary and proceed on their yes.
+next person sees why choices were made, and in `.github/repo-setup.yaml` (Step 3.8). If
+the user has already stated the answers, say so in the summary and proceed on their yes.
 
 ## Step 2: Choose the target level
 
@@ -101,7 +121,11 @@ locks themselves out.
    required checks, review rules, secret scanning/push protection, private vulnerability
    reporting, Dependabot alerts, environments. These are outward-facing changes to the
    owner's account: show what you will change and get explicit approval first.
-8. **Verify** (Step 4).
+8. **Record**: write `.github/repo-setup.yaml` from `assets/repo-setup.yaml` with the answers
+   from Step 1, the target, and the controls skipped and why. Update it, don't replace it, if
+   it exists: other skills (the openssf-* badge skills) add their own sections. Keep a
+   comment out of the README; this file is where agents look.
+9. **Verify** (Step 4).
 
 Commit in small Conventional Commits as you go (`chore: add security policy`, `ci: add
 secret scanning`), each one green. If the repo already has history, do this on a branch
@@ -114,6 +138,10 @@ reach the network, run the offline subset and say plainly that the rest is unver
 hooks (bad message, runtime fake secret), `gitleaks` on history and tree, `shellcheck` on
 hooks/scripts/workflow `run:` blocks, YAML parse, grep for unpinned `uses:`, leftover
 placeholders and paid-only features, and whatever tests need no dependencies.
+
+Start with `scripts/check-setup.py` (Step 0): it must exit 0. It covers the files, hooks,
+workflow pinning and permissions, dependency updates, lockfiles, gitleaks, the GitHub
+settings and any recorded badge, but not whether things work, so go on to the list below.
 
 Full verification:
 
@@ -164,10 +192,14 @@ repo or a token, pushing release tags, approving setting changes).
   saas-b2b, including containers, IaC, DAST, secrets and evidence for customers.
 - `references/lessons.md` - detailed pitfalls and their fixes.
 - `scripts/pin-actions.sh` - pin every GitHub Action in a repo to a commit SHA.
-- `scripts/git-init-prompt.zsh` - optional zsh wrapper: after the user types `git init`, it
-  offers to start Claude Code, Copilot CLI or Antigravity in the new repo with this skill (and any
-  others listed in `~/.config/jq-tools/git-init-prompt/config.yaml`). Not part of a setup run;
-  mention it only if the user asks to be offered setup on every new repo.
+- `scripts/check-setup.py` - the quick, read-only check of a set-up repo (Step 0 and Step 4);
+  `--json` for a machine-readable list of failures, `--offline` to skip GitHub and the badge.
+- `scripts/git-init-prompt.zsh` - optional zsh wrapper around `git init`. On a new repo it
+  offers to start Claude Code, Copilot CLI or Antigravity with this skill (and any others listed
+  in `~/.config/jq-tools/git-init-prompt/config.yaml`); on a re-init it runs the check and
+  offers an agent only for what failed. Not part of a setup run; mention it only if the user
+  asks to be offered setup on every repo.
+- `assets/repo-setup.yaml` - the template for the setup record.
 - `assets/` - templates for docs, hooks, workflows (security, container scan/SBOM, and
   public-only CodeQL/Scorecard/dependency-review), Dependabot, Security Insights, and
   `scripts/aws-oidc-login.sh`, `sast-opengrep.yml` (Opengrep with pinned binary and rules),
