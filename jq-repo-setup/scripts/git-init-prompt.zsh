@@ -120,7 +120,8 @@ _gip_offer() {
   (( ${#missing} )) && print -u2 "git-init-prompt: skipping skills not found in skill_dirs: ${(j:, :)missing}"
   (( ${#found} )) || return 0
 
-  print -n "Set up ${target:t} with ${(j:, then :)${found:t}}? [y/N] "
+  local -a names=(${found:t})
+  print -n "Set up ${target:t} with ${(j:, then :)names}? [y/N] "
   read -r reply || return 0
   [[ $reply == [yY]* ]] || return 0
 

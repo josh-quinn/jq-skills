@@ -55,6 +55,7 @@ check "existing config is not rewritten" "grep -q '^# mine' $cfg"
 # 2. Yes with a fixed agent starts it in the new repo with each skill's SKILL.md.
 reset; write_cfg claude
 out=$(git init -q $tmp/r/b <<< "y" 2>&1)
+check "the question names every skill in order" '[[ $out == *"with jq-repo-setup, then openssf-passing?"* ]]'
 check "claude is started" "grep -q '^agent=claude' $tmp/called"
 check "agent runs in the new repo" "grep -qx 'cwd=${tmp:A}/r/b' $tmp/called"
 check "prompt names jq-repo-setup first, then openssf-passing" \
