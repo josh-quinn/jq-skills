@@ -25,7 +25,7 @@ done
 
 export JQ_TOOLS_CONFIG=$tmp/cfg JQ_GIT_INIT_PROMPT=always
 cfg=$JQ_TOOLS_CONFIG/git-init-prompt/config.yaml
-source $here/../jq-repo-setup/scripts/git-init-prompt.zsh
+source $here/../scripts/git-init-prompt.zsh
 
 write_cfg() {  # agent [enabled]
   mkdir -p ${cfg:h}
