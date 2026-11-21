@@ -1,2 +1,2 @@
 # Planted fake token in a test that checks secrets are masked in the inventory.
-0ae25542d4cd221d8075ca49fcc3bc0307c5d897:privacy-common/tests/test_privacy.py:generic-api-key:420
+0ae25542d4cd221d8075ca49fcc3bc0307c5d897:jq-privacy-common/tests/test_privacy.py:generic-api-key:420

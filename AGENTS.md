@@ -3,7 +3,7 @@
 One repo for all the owner's agent skills. Each skill is a top-level folder with a `SKILL.md`.
 
 1. **One folder per skill** at the top level. Shared material goes in a `*-common/` folder,
-   once (`privacy-common/`, `openssf-common/`); the skills that use it refer to it as
+   once (`jq-privacy-common/`, `jq-openssf-common/`); the skills that use it refer to it as
    `../<name>-common`. Don't copy it.
 2. **Never write into `~/.claude/skills` or `~/.copilot/skills`.** Edit here; `make link`
    symlinks the skills there.
@@ -19,17 +19,17 @@ One repo for all the owner's agent skills. Each skill is a top-level folder with
 6. Eval workspaces (`*-workspace/`) are git-ignored. Evals use planted fixtures and stop at
    the report; they never touch real services.
 
-## privacy-audit, privacy-sandbox, privacy-common
+## jq-privacy-audit, jq-privacy-sandbox, jq-privacy-common
 
-- Patterns and host lists live in `privacy-common/scripts/signatures.yaml`, not in code or
+- Patterns and host lists live in `jq-privacy-common/scripts/signatures.yaml`, not in code or
   prose. Keep it ASCII: write invisible characters as `\uXXXX` escapes so they can be reviewed.
 - `make sandbox-smoke` runs a real sandbox against a planted leaky package (needs Docker).
 - Nothing under audit is ever run outside the sandbox, and the sandbox never runs without the
   user's go-ahead.
 
-## openssf-common, openssf-passing
+## jq-openssf-common, jq-openssf-passing
 
-- Criteria are read live (`openssf-common/scripts/badge.py`). Don't hard-code criterion lists
+- Criteria are read live (`jq-openssf-common/scripts/badge.py`). Don't hard-code criterion lists
   or counts into a skill as facts.
 - Evals never touch bestpractices.dev: they stop at the gap table, repo changes and
   `answers.yaml`.

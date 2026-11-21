@@ -14,9 +14,9 @@
       "description": "Check a tool before you trust it with your data: static audit plus an optional Docker sandbox.",
       "version": "0.1.0",
       "skills": [
-        "./privacy-audit",
-        "./privacy-sandbox",
-        "./privacy-common"
+        "./jq-privacy-audit",
+        "./jq-privacy-sandbox",
+        "./jq-privacy-common"
       ]
     },
     {
@@ -36,8 +36,8 @@
       "description": "Take a project to the OpenSSF Best Practices badges honestly (passing level so far).",
       "version": "0.1.0",
       "skills": [
-        "./openssf-common",
-        "./openssf-passing"
+        "./jq-openssf-common",
+        "./jq-openssf-passing"
       ]
     }
   ]

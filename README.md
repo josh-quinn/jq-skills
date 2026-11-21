@@ -6,15 +6,15 @@ their own, so install a group together.
 
 | Skill | Group | Does |
 |---|---|---|
-| [`privacy-audit`](privacy-audit/SKILL.md) | privacy-audit | Reads a skill, plugin, MCP server, package, app or extension without running it, traces where your data goes, and writes a report with a verdict. |
-| [`privacy-sandbox`](privacy-sandbox/SKILL.md) | privacy-audit | With your go-ahead, runs the target in Docker with planted fake data behind a proxy that records and blocks every connection. |
-| [`privacy-common`](privacy-common/SKILL.md) | privacy-audit | Shared: the `privacy.py` helper, policy and verdicts, report template, safe fetching. |
+| [`jq-privacy-audit`](jq-privacy-audit/SKILL.md) | privacy-audit | Reads a skill, plugin, MCP server, package, app or extension without running it, traces where your data goes, and writes a report with a verdict. |
+| [`jq-privacy-sandbox`](jq-privacy-sandbox/SKILL.md) | privacy-audit | With your go-ahead, runs the target in Docker with planted fake data behind a proxy that records and blocks every connection. |
+| [`jq-privacy-common`](jq-privacy-common/SKILL.md) | privacy-audit | Shared: the `privacy.py` helper, policy and verdicts, report template, safe fetching. |
 | [`jq-repo-setup`](jq-repo-setup/SKILL.md) | jq-repo-setup | Sets up or hardens a repo with engineering, security and supply-chain practices using free and open-source tooling. Also holds the optional git-init prompt. |
-| [`openssf-passing`](openssf-passing/SKILL.md) | openssf-badges | Takes a project to the OpenSSF Best Practices "passing" badge, honestly (draft). |
-| [`openssf-common`](openssf-common/SKILL.md) | openssf-badges | Shared: live criteria, answers checker, proposal URLs, workflow and honesty rules. |
+| [`jq-openssf-passing`](jq-openssf-passing/SKILL.md) | openssf-badges | Takes a project to the OpenSSF Best Practices "passing" badge, honestly (draft). |
+| [`jq-openssf-common`](jq-openssf-common/SKILL.md) | openssf-badges | Shared: live criteria, answers checker, proposal URLs, workflow and honesty rules. |
 
-More on each: [privacy audit](docs/privacy-audit-skills.md), [jq-repo-setup](docs/jq-repo-setup.md),
-[OpenSSF badges](docs/openssf-badge-skills.md).
+More on each: [privacy audit](docs/jq-privacy-audit-skills.md), [jq-repo-setup](docs/jq-repo-setup.md),
+[OpenSSF badges](docs/jq-openssf-badge-skills.md).
 
 ## Install
 
