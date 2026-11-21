@@ -86,6 +86,8 @@ _gip_target() {
 }
 
 git() {
+  # Some shells (agents' snapshots) keep this function but not the helpers beside it.
+  (( $+functions[_gip_target] )) || { command git "$@"; return }
   local target existed=0 rc
   if target=$(_gip_target "$@") && [[ -n $target ]]; then
     [[ -e $target/.git ]] && existed=1
