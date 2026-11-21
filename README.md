@@ -49,6 +49,13 @@ As a Claude Code plugin (installs all three skills together):
 /plugin install privacy-audit --marketplace josh-quinn/privacy-audit-skills
 ```
 
+With the [Skills CLI](https://skills.sh/), for Claude Code, Copilot and other agents (pick all
+three skills, since the other two read `privacy-common` from beside their folders):
+
+```sh
+npx skills add josh-quinn/privacy-audit-skills
+```
+
 From a clone, for development:
 
 ```sh
