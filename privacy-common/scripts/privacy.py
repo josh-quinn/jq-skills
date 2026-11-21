@@ -355,7 +355,7 @@ def scan(root: Path, policy: Policy, deps: bool = False) -> dict:
         for line in lines[:-1]:
             starts.append(starts[-1] + len(line) + 1)
 
-        def line_of(offset: int) -> int:
+        def line_of(offset: int, starts=starts) -> int:  # bound now: this runs inside the loop
             return bisect.bisect_right(starts, offset)
 
         # Whole-file searches are far faster than line by line; one finding per line and category.
@@ -509,7 +509,7 @@ def init_work(cfg: dict, target: str) -> dict:
 
 
 def get(url: str) -> bytes:
-    req = Request(url, headers={"User-Agent": "privacy-audit (+source review)", "Accept-Encoding": "gzip"})
+    req = Request(url, headers={"User-Agent": "privacy-audit (+source review)", "Accept-Encoding": "gzip"})  # noqa: S310 - https registry URLs only
     with urlopen(req, timeout=60) as r:  # noqa: S310 - https registry URLs only
         data = r.read()
     return gzip.decompress(data) if data[:2] == b"\x1f\x8b" and not url.endswith((".tgz", ".tar.gz")) else data

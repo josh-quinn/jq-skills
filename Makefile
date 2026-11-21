@@ -1,4 +1,4 @@
-.PHONY: test check link unlink sandbox-smoke hooks install-shell uninstall-shell
+.PHONY: test coverage lint check link unlink sandbox-smoke hooks install-shell uninstall-shell
 
 PY = uv run --no-project --with pyyaml --with pytest
 
@@ -7,7 +7,15 @@ test:
 	zsh jq-repo-setup/tests/test-git-init-prompt.zsh
 	sh jq-repo-setup/tests/test-install-shell.sh
 
-check: test
+# Line coverage of the helper scripts (the number to quote for the OpenSSF test_most criterion).
+coverage:
+	uv run -q --no-project --with pyyaml --with pytest --with pytest-cov pytest -q privacy-common/tests privacy-sandbox/tests openssf-common/tests jq-repo-setup/tests --cov=privacy-common/scripts --cov=privacy-sandbox/scripts --cov=privacy-sandbox/assets --cov=openssf-common/scripts --cov=jq-repo-setup/scripts --cov-report=term
+	@rm -f .coverage
+
+lint:
+	uv run -q --no-project --with ruff==0.17.6 ruff check .
+
+check: test lint
 	sh -n scripts/link-skills.sh
 	sh -n scripts/sandbox-smoke.sh
 	sh -n scripts/install-shell.sh
