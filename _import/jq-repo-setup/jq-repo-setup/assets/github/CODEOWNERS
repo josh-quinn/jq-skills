@@ -1,0 +1,5 @@
+# Every change needs an approving review from a code owner.
+* @<OWNER>
+# saas-b2b: name owners for sensitive paths, e.g.
+# /internal/auth/ @<OWNER> @<SECURITY_REVIEWER>
+# /infra/       @<OWNER>

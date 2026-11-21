@@ -1,0 +1,47 @@
+# Static analysis (SAST) with Opengrep: free on private repos, replaces CodeQL there.
+# Opengrep ships as a single binary, not an action, so it is downloaded at a pinned
+# version and checked against a pinned SHA-256; the rules are fetched at a pinned commit
+# (rules change findings, so unpinned rules make CI flaky and are a supply-chain risk).
+# Refresh: take the new release's asset checksum from its GitHub release page, and the
+# latest opengrep/opengrep-rules commit. Change the --config directories and the scanned
+# path to the repo's languages (see the rules repo for directory names).
+name: sast
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  sast:
+    name: sast opengrep
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      OPENGREP_VERSION: v1.33.1
+      OPENGREP_SHA256: 46e8133cc490f9f50518061590ce2f6be5a08afaeda034471c0ceda4b3899808
+      RULES_COMMIT: f1d2b562b414783763fd02a6ed2736eaed622efa # opengrep/opengrep-rules
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install opengrep (checksum verified)
+        run: |
+          curl -fsSL -o "$RUNNER_TEMP/opengrep" \
+            "https://github.com/opengrep/opengrep/releases/download/${OPENGREP_VERSION}/opengrep_manylinux_x86"
+          echo "${OPENGREP_SHA256}  $RUNNER_TEMP/opengrep" | sha256sum -c -
+          chmod +x "$RUNNER_TEMP/opengrep"
+      - name: Fetch pinned rules
+        run: |
+          git init -q "$RUNNER_TEMP/rules"
+          git -C "$RUNNER_TEMP/rules" fetch -q --depth 1 https://github.com/opengrep/opengrep-rules.git "$RULES_COMMIT"
+          git -C "$RUNNER_TEMP/rules" checkout -q FETCH_HEAD
+      - name: Scan TypeScript sources (fails on any finding)
+        run: |
+          "$RUNNER_TEMP/opengrep" scan --error --metrics=off \
+            --config "$RUNNER_TEMP/rules/typescript" --config "$RUNNER_TEMP/rules/generic/secrets" \
+            --exclude node_modules --exclude dist src # edit: languages and source dir

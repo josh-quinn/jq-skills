@@ -1,0 +1,94 @@
+# Language-agnostic security and hygiene gates. Works on public and private repos with
+# no paid features. Add the job names to the branch ruleset's required checks.
+# SHAs below were current when this template was written; refresh them with
+# scripts/pin-actions.sh --update after copying.
+name: security
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: security-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  secrets:
+    name: secrets (gitleaks, full history)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read # per job as well as top level (OSPS-AC-04.02)
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0 # every commit: history is published too
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: stable
+      - name: Scan every commit for secrets
+        run: go run github.com/zricethezav/gitleaks/v8@v8.30.1 git --log-opts="--all" --redact --no-banner -v .
+
+  commits:
+    name: commits (Conventional Commits)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read # per job as well as top level (OSPS-AC-04.02)
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Check every commit message in the pull request
+        # Skipped jobs count as passing required checks, so pushes to main pass.
+        if: github.event_name == 'pull_request'
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          status=0
+          for c in $(git rev-list --no-merges "$BASE..$HEAD"); do
+            git log -1 --format=%B "$c" > "$RUNNER_TEMP/msg"
+            .githooks/commit-msg "$RUNNER_TEMP/msg" || { echo "::error::commit $c"; status=1; }
+          done
+          exit "$status"
+
+  workflows:
+    name: workflows (actionlint, zizmor)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read # per job as well as top level (OSPS-AC-04.02)
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: stable # actionlint needs Go >= 1.25
+      - name: actionlint (with shellcheck of run steps)
+        run: go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.12
+      - name: shellcheck hooks and scripts
+        run: shellcheck .githooks/* scripts/*.sh # drop scripts/*.sh if the repo has none
+      - name: zizmor (workflow security)
+        uses: zizmorcore/zizmor-action@45d7276c9ca790aabd705e31ca99c6185c3e76dd # v0.8.1
+        with:
+          advanced-security: false # true only where code scanning is available
+
+  dependencies:
+    name: dependencies (OSV-Scanner)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read # per job as well as top level (OSPS-AC-04.02)
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: stable
+      - name: Scan lockfiles for known vulnerabilities
+        run: go run github.com/google/osv-scanner/v2/cmd/osv-scanner@v2.7.1 scan source --recursive .
