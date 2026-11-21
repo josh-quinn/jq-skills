@@ -1,5 +1,6 @@
 import base64
 import json
+import re
 import struct
 import sys
 from pathlib import Path
@@ -119,7 +120,7 @@ def test_prepare_plants_canaries_and_writes_compose(tmp_path):
     env = (box / "sandbox/target.env").read_text()
     assert "HTTPS_PROXY=http://proxy:8080" in env and canaries["env:OPENAI_API_KEY"] in env
     compose = (box / "compose.yaml").read_text()
-    assert "internal: true" in compose and "registry.npmjs.org" in compose
+    assert "internal: true" in compose and re.search(r"\bregistry\.npmjs\.org\b", compose)
     assert str(tmp_path / "tool") in compose
     assert json.loads((box / "settings.json").read_text())["install"] == "npm install --no-audit --no-fund"
 

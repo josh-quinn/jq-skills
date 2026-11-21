@@ -92,7 +92,8 @@ def main():
     elif args.calls == "auto":
         calls = [{"name": t["name"], "arguments": fill(t.get("inputSchema", {}), args.canary_text)} for t in tools]
     else:
-        calls = json.load(open(args.calls))
+        with open(args.calls) as f:
+            calls = json.load(f)
     with open(os.path.join(args.out, "calls.jsonl"), "w") as f:
         for c in calls:
             result = client.call("tools/call", {"name": c["name"], "arguments": c.get("arguments", {})})

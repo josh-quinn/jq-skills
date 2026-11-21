@@ -625,7 +625,9 @@ def cli(argv=None) -> int:
         return main(argv)
     except BrokenPipeError:
         # Point stdout at devnull so the interpreter's final flush doesn't fail again.
-        os.dup2(os.open(os.devnull, os.O_WRONLY), sys.stdout.fileno())
+        devnull = os.open(os.devnull, os.O_WRONLY)
+        os.dup2(devnull, sys.stdout.fileno())
+        os.close(devnull)
         return 0
 
 
