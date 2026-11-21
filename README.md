@@ -60,3 +60,8 @@ make sandbox-smoke  # a real sandbox run against a planted leaky package (needs 
 See [AGENTS.md](AGENTS.md) for the rules and [CONTRIBUTING.md](CONTRIBUTING.md) for the
 workflow. Skill evals live in each skill's `evals/` folder (the `claude plugin eval` layout)
 and use planted fixtures.
+
+## Licence
+
+[MIT](LICENSE). Please follow the [code of conduct](CODE_OF_CONDUCT.md); report security
+issues as described in [SECURITY.md](SECURITY.md).

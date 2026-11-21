@@ -6,9 +6,8 @@ Only the latest commit on `main` is supported. There are no releases yet.
 
 ## Reporting a vulnerability
 
-Please **do not open a public issue**. Report privately to the repository owner
-(Josh Quinn) directly, or through GitHub private vulnerability reporting (the repository's
-**Security** tab, **Report a vulnerability**) once the repository is hosted there.
+Please **do not open a public issue**. Report privately through GitHub private vulnerability
+reporting: the repository's **Security** tab, **Report a vulnerability**.
 
 Include what you did, what happened, the commit, and your environment. Expect an
 acknowledgement within 7 days and an assessment within 14 days.
