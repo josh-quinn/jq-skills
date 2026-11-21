@@ -30,8 +30,10 @@ justification required.
   determined Unmet", and fu showed it even with a top-level README covering install and use.
   The fix that worked is a file directly in `docs/` (`docs/README.md`) that covers installing,
   starting, using, and using securely (the security part can be short), linking to the README
-  sections rather than repeating them. Add it whenever the repo has no file directly in `docs/`,
-  and cite its URL in the justification.
+  sections rather than repeating them. Add it whenever the repo has no `docs/README.md`: other
+  files directly in `docs/` may not satisfy the automation, and the one known fix is this file
+  by this name. Cite its URL in the justification. Until the site has been seen to accept the
+  alternative, mark `documentation_basics` as a place the automation may disagree.
 - `documentation_interface` (N): reference docs for inputs and outputs: `--help`, API docs, a
   config reference. Check that they exist and are current.
 - `sites_https`: every project URL (homepage, repo, downloads) is https.
@@ -82,7 +84,9 @@ justification required.
   `test_invocation` (SHOULD): the standard command for the language (`pytest`, `npm test`,
   `go test ./...`, `cargo test`).
 - `test_most` (SUGGESTED): **measure, then quote the number** (`pytest --cov`, `go test -cover`,
-  `c8`/`nyc`). Don't estimate.
+  `c8`/`nyc`). Don't estimate. If the project doesn't have the coverage tool, run it without
+  installing anything into the repo, e.g. `uv run --no-project --with pytest-cov --with <deps>
+  pytest --cov=<package>`.
 - `test_continuous_integration` (SUGGESTED): the CI workflow that runs the tests on pushes and
   PRs. Link the workflow.
 - `test_policy`: a policy, formal or not, that major new functionality gets tests. Word of mouth
