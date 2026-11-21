@@ -1,0 +1,11 @@
+# Python dependencies are not pinned in a manifest (the Makefile runs uv with --with), so
+# only the workflow actions need updating.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ["*"]
