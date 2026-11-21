@@ -107,7 +107,7 @@ def prepare(tmp_path, *extra):
         "run": None, "mcp": None, "calls": None, "mode": "registries", "allow": None, "own": None, "profile": None,
         "timeout": 60, "linger": 1,
     })
-    for flag, value in zip(extra[::2], extra[1::2]):
+    for flag, value in zip(extra[::2], extra[1::2], strict=True):
         setattr(args, flag.lstrip("-"), value)
     return sandbox.prepare(args)
 
@@ -158,3 +158,104 @@ def test_fill_uses_canary_text_for_required_strings():
     schema = {"type": "object", "properties": {"text": {"type": "string"}, "n": {"type": "integer"},
                                                  "opt": {"type": "string"}}, "required": ["text", "n"]}
     assert mcp_drive.fill(schema, "CANARY") == {"text": "CANARY", "n": 1}
+
+
+# --- command line -----------------------------------------------------------
+
+
+def test_cli_prepare_prints_the_box_and_asks_before_running(tmp_path, capsys):
+    target = tmp_path / "tool"
+    target.mkdir()
+    (target / "package.json").write_text("{}")
+    sandbox.main(["prepare", "--work", str(tmp_path / "work"), "--target", str(target)])
+    out = json.loads(capsys.readouterr().out)
+    assert Path(out["sandbox"]).is_dir() and "ask first" in out["next"]
+    assert out["settings"]["install"].startswith("npm install")
+
+
+def test_cli_report_summarises_a_finished_box_and_saves_it(tmp_path, capsys, monkeypatch):
+    box = tmp_path / "box"
+    box.mkdir()
+    monkeypatch.setattr(sandbox, "summarise", lambda b: {"stub": True})
+    monkeypatch.setattr(sandbox, "format_report", lambda s: "REPORT\n")
+    sandbox.main(["report", str(box)])
+    assert "REPORT" in capsys.readouterr().out and (box / "sandbox-report.md").read_text() == "REPORT\n"
+
+
+def test_cli_run_saves_the_report_and_prints_the_exit_code(tmp_path, capsys, monkeypatch):
+    box = tmp_path / "box"
+    box.mkdir()
+    monkeypatch.setattr(sandbox, "run", lambda b: 3)
+    monkeypatch.setattr(sandbox, "summarise", lambda b: {})
+    monkeypatch.setattr(sandbox, "format_report", lambda s: "R\n")
+    sandbox.main(["run", str(box)])
+    out = capsys.readouterr().out
+    assert "target exit code 3" in out and (box / "sandbox-report.md").exists()
+
+
+def test_cli_clean_tears_the_compose_project_down(tmp_path, monkeypatch):
+    calls = []
+    monkeypatch.setattr(sandbox, "compose", lambda box, *a, **k: calls.append(a))
+    sandbox.main(["clean", str(tmp_path)])
+    assert calls and calls[0][0] == "down" and "--remove-orphans" in calls[0]
+
+
+# --- the MCP driver against a fake server ------------------------------------
+
+FAKE_MCP = r'''
+import json, sys
+for line in sys.stdin:
+    msg = json.loads(line)
+    if "id" not in msg:
+        continue
+    method = msg["method"]
+    if method == "initialize":
+        result = {"serverInfo": {"name": "fake"}}
+    elif method == "tools/list":
+        result = {"tools": [{"name": "echo", "description": "Echo text",
+                             "inputSchema": {"type": "object", "properties": {"text": {"type": "string"}}}}]}
+    else:
+        result = {"content": [{"type": "text", "text": "got " + json.dumps(msg["params"]["arguments"])}]}
+    print("log line that is not JSON", flush=True)  # a server logging to stdout
+    print(json.dumps({"jsonrpc": "2.0", "id": msg["id"], "result": result}), flush=True)
+'''
+
+
+def drive(tmp_path, monkeypatch, *flags):
+    server = tmp_path / "fake_mcp.py"
+    server.write_text(FAKE_MCP)
+    out = tmp_path / "logs"
+    out.mkdir()
+    monkeypatch.setattr(sys, "argv", ["mcp_drive.py", "--out", str(out), "--timeout", "10", *flags,
+                                      "--", sys.executable, str(server)])
+    mcp_drive.main()
+    return out
+
+
+def test_driver_lists_tools_without_calling_them_by_default(tmp_path, monkeypatch):
+    out = drive(tmp_path, monkeypatch)
+    tools = json.loads((out / "tools.json").read_text())
+    assert [t["name"] for t in tools["tools"]] == ["echo"]
+    assert (out / "calls.jsonl").read_text() == ""
+
+
+def test_driver_auto_calls_every_tool_with_canary_text(tmp_path, monkeypatch):
+    out = drive(tmp_path, monkeypatch, "--calls", "auto", "--canary-text", "CANARY-1")
+    rows = [json.loads(line) for line in (out / "calls.jsonl").read_text().splitlines()]
+    assert rows[0]["call"] == {"name": "echo", "arguments": {"text": "CANARY-1"}}
+    assert "CANARY-1" in json.dumps(rows[0]["result"])
+
+
+def test_driver_makes_the_calls_in_a_json_file(tmp_path, monkeypatch):
+    calls = tmp_path / "calls.json"
+    calls.write_text(json.dumps([{"name": "echo", "arguments": {"text": "hello"}}]))
+    out = drive(tmp_path, monkeypatch, "--calls", str(calls))
+    rows = [json.loads(line) for line in (out / "calls.jsonl").read_text().splitlines()]
+    assert len(rows) == 1 and "hello" in json.dumps(rows[0]["result"])
+
+
+def test_driver_reports_a_server_that_exits(tmp_path):
+    script = tmp_path / "dies.py"
+    script.write_text("import sys; sys.exit(4)")
+    client = mcp_drive.Client([sys.executable, str(script)], timeout=10)
+    assert "error" in client.call("initialize")
