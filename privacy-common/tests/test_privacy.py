@@ -427,3 +427,56 @@ def test_inventory_masks_secrets(tmp_path):
     assert "SLACK_TOKEN" in text
     kinds = {(i["kind"], i["name"]) for i in items}
     assert ("mcp", "slack") in kinds and ("skill", "watch") in kinds
+
+
+# --- command line -----------------------------------------------------------
+
+
+def run_cli(capsys, *argv):
+    privacy.main(list(argv))
+    return capsys.readouterr().out
+
+
+def test_cli_config_prints_the_profile_and_rules(capsys):
+    out = run_cli(capsys, "config")
+    assert "profile: personal" in out and "profile_source" in out and "trusted_domains" in out
+
+
+def test_cli_init_makes_a_work_folder(capsys, tmp_path, config_root):
+    write(config_root, "privacy-audit/config.yaml", f"data_dir: {tmp_path / 'audits'}\n")
+    out = json.loads(run_cli(capsys, "init", "--target", "my tool"))
+    assert Path(out["work_dir"]).parent == tmp_path / "audits" / "my-tool"
+    assert Path(out["work_dir"]).is_dir() and Path(out["source_dir"]).is_dir()
+
+
+def test_cli_classify_reports_each_host(capsys):
+    out = run_cli(capsys, "classify", "us.i.posthog.com", "api.openai.com", "--own", "example.com")
+    assert "profile personal" in out and "us.i.posthog.com" in out and "api.openai.com" in out
+
+
+def test_cli_scan_prints_text_and_json(capsys, tmp_path):
+    write(tmp_path, "tool/index.js", "fetch('https://sync.notes-cloud.xyz/up')\n")
+    assert "sync.notes-cloud.xyz" in run_cli(capsys, "scan", str(tmp_path / "tool"))
+    data = json.loads(run_cli(capsys, "scan", str(tmp_path / "tool"), "--json"))
+    assert {h["host"] for h in data["hosts"]} == {"sync.notes-cloud.xyz"}
+
+
+def test_cli_unasar_reports_the_file_count(capsys, tmp_path):
+    asar = tmp_path / "app.asar"
+    make_asar(asar, {"main.js": b"1", "lib/a.js": b"2"})
+    assert "unpacked 2 files" in run_cli(capsys, "unasar", str(asar), str(tmp_path / "out"))
+
+
+def test_cli_fetch_prints_what_the_fetcher_returns(capsys, tmp_path, monkeypatch):
+    monkeypatch.setattr(privacy, "fetch", lambda kind, spec, dest: {"kind": kind, "spec": spec, "files": 3})
+    out = json.loads(run_cli(capsys, "fetch", "npm", "left-pad@1.0.0", str(tmp_path / "d")))
+    assert out == {"kind": "npm", "spec": "left-pad@1.0.0", "files": 3}
+
+
+def test_cli_inventory_lists_installed_things_as_text_and_json(capsys, tmp_path, monkeypatch):
+    home = tmp_path / "home"
+    write(home, ".claude/skills/watch/SKILL.md", "---\nname: watch\n---\n")
+    monkeypatch.setenv("HOME", str(home))
+    assert "watch" in run_cli(capsys, "inventory")
+    items = json.loads(run_cli(capsys, "inventory", "--json"))
+    assert ("skill", "watch") in {(i["kind"], i["name"]) for i in items}
