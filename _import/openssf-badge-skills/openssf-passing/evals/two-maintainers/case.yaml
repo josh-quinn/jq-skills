@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: two-maintainers
+context:
+  scaffold_script: place-files.sh
+expected_outcome: |
+  Mostly answers for an already well-kept two-maintainer project, without inventing unnecessary changes, calling it solo, or answering for the developers.

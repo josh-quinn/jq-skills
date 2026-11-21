@@ -1,0 +1,24 @@
+en:
+  criteria:
+    '0':
+      description_good:
+        description: The project website MUST succinctly describe what the software does.
+      contribution:
+        description: The information on how to contribute MUST explain the <a href="#x">contribution process</a>.
+        details: Projects should use pull requests.
+      documentation_basics:
+        description: The project MUST provide basic documentation.
+      know_secure_design:
+        description: The project MUST have at least one primary developer who knows how to design secure software.
+      crypto_pfs:
+        description: The security mechanisms SHOULD implement perfect forward secrecy.
+      static_analysis:
+        description: At least one static code analysis tool MUST be applied.
+      test_most:
+        description: It is SUGGESTED that the test suite cover most of the code.
+    '1':
+      governance:
+        description: The project MUST clearly define and document its project governance model.
+    baseline-1:
+      osps_ac_01_01:
+        description: The system MUST require MFA.
