@@ -1,12 +1,44 @@
 {
-  "name": "privacy-audit-skills",
-  "owner": { "name": "Josh Quinn" },
+  "name": "jq-skills",
+  "owner": {
+    "name": "Josh Quinn"
+  },
+  "metadata": {
+    "description": "Josh Quinn's agent skills: privacy audit, repo setup and OpenSSF badges."
+  },
   "plugins": [
     {
       "name": "privacy-audit",
       "source": "./",
+      "strict": false,
       "description": "Check a tool before you trust it with your data: static audit plus an optional Docker sandbox.",
-      "version": "0.1.0"
+      "version": "0.1.0",
+      "skills": [
+        "./privacy-audit",
+        "./privacy-sandbox",
+        "./privacy-common"
+      ]
+    },
+    {
+      "name": "jq-repo-setup",
+      "source": "./",
+      "strict": false,
+      "description": "Set up or harden a repository with engineering, security and supply-chain practices using free and open-source tooling.",
+      "version": "0.1.0",
+      "skills": [
+        "./jq-repo-setup"
+      ]
+    },
+    {
+      "name": "openssf-badges",
+      "source": "./",
+      "strict": false,
+      "description": "Take a project to the OpenSSF Best Practices badges honestly (passing level so far).",
+      "version": "0.1.0",
+      "skills": [
+        "./openssf-common",
+        "./openssf-passing"
+      ]
     }
   ]
 }
