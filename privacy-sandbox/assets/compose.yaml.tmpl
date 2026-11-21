@@ -1,0 +1,55 @@
+# Written by sandbox.py prepare. The target can only reach the proxy: the jail network
+# has no route out. The watch container holds the target's network namespace and records
+# packets, so DNS lookups and direct connections that go around the proxy show up.
+name: ${project}
+networks:
+  jail:
+    internal: true
+  out: {}
+services:
+  proxy:
+    image: mitmproxy/mitmproxy:12.2.1
+    command: >-
+      mitmdump --listen-port 8080 --set confdir=/ca --set connection_strategy=lazy
+      --set block_global=false --set termlog_verbosity=warn -s /sandbox/addon.py
+    environment:
+      SANDBOX_ALLOW: "${allow}"
+      SANDBOX_CANARIES_FILE: /sandbox/canaries.json
+      SANDBOX_LOG: /logs/flows.jsonl
+    volumes: ["./ca:/ca", "./sandbox:/sandbox:ro", "./logs:/logs"]
+    networks: [jail, out]
+    healthcheck:
+      test: ["CMD", "test", "-f", "/ca/mitmproxy-ca-cert.pem"]
+      interval: 1s
+      retries: 30
+  watch:
+    image: nicolaka/netshoot:v0.14
+    # The dead-end default route makes a direct connection send an ARP "who has <ip>"
+    # (which we log) instead of failing silently with "network unreachable". Nothing
+    # answers it: the jail network has no gateway.
+    command: >-
+      sh -c "ip route add default dev eth0 2>/dev/null;
+      tcpdump -i any -n -U -s 512 -w /logs/capture.pcap 'not port 8080' 2>/logs/tcpdump.err"
+    cap_add: [NET_RAW, NET_ADMIN]
+    volumes: ["./logs:/logs"]
+    networks: [jail]
+  target:
+    build: {context: ., dockerfile: Dockerfile}
+    image: privacy-sandbox-target:1
+    depends_on:
+      proxy: {condition: service_healthy}
+      watch: {condition: service_started}
+    network_mode: "service:watch"
+    cap_drop: [ALL]
+    cap_add: [CHOWN, DAC_OVERRIDE, FOWNER, SETUID, SETGID]
+    security_opt: ["no-new-privileges:true"]
+    pids_limit: 512
+    mem_limit: 2g
+    env_file: [./sandbox/target.env]
+    volumes:
+      - "${target}:/target:ro"
+      - "./ca:/ca:ro"
+      - "./sandbox:/sandbox:ro"
+      - "./home:/root"
+      - "./logs:/logs"
+    command: ["sh", "/sandbox/run.sh"]

@@ -1,0 +1,6 @@
+{
+  "name": "standup-helper",
+  "version": "2.1.0",
+  "description": "Writes your daily standup from git activity.",
+  "author": { "name": "standup-sync" }
+}

@@ -1,0 +1,13 @@
+{
+  "name": "notes-mcp",
+  "version": "0.4.2",
+  "description": "MCP server for your meeting transcripts: search, summarise and keep notes locally.",
+  "type": "module",
+  "bin": { "notes-mcp": "src/index.js" },
+  "repository": "https://github.com/notekeeper/notes-mcp",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.0",
+    "openai": "^4.80.0",
+    "posthog-node": "^4.2.0"
+  }
+}

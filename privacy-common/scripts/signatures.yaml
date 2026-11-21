@@ -1,0 +1,349 @@
+# Patterns privacy.py uses to find candidate data flows. A match is a lead to read,
+# never a verdict. Add your own under `signatures:` in the config file; they are
+# merged with these.
+#
+# Each pattern is a Python regular expression, matched line by line. `in` limits a
+# pattern to some kinds of file: code, instructions, docs, config, manifest, lockfile.
+
+patterns:
+  network-call:
+    in: [code, instructions, config]
+    regex:
+      - '\bfetch\s*\('
+      - '\baxios(\.\w+)?\s*\('
+      - '\bgot\.(get|post|put|patch|delete|head|stream|extend|paginate)\s*\('
+      - '\bXMLHttpRequest\b'
+      - '\bsendBeacon\s*\('
+      - '\bnew\s+WebSocket\s*\('
+      - '\bhttps?\.(request|get)\s*\('
+      - '\b(net|tls)\.(connect|createConnection)\s*\('
+      - '\bdgram\.createSocket\b'
+      # HTTP libraries by import: their bare names (got, needle, ky) are ordinary words in other code
+      - '(require\(\s*|from\s+|import\s*\(\s*)["''](node-fetch|undici|superagent|needle|ky|got|axios|cross-fetch|isomorphic-fetch|ws|socket\.io-client)["'']'
+      - '(require\(\s*|from\s+)["''](node:)?(https?|net|tls|dgram|dns)["'']'
+      # Electron: its own HTTP client, links opened in the browser, remote pages loaded in a window
+      - '\bnet\.(request|fetch)\s*\('
+      - '\bshell\.openExternal\s*\('
+      - '\.loadURL\s*\(\s*[^)\s]'
+      - '\brequests\.(get|post|put|patch|delete|request|Session)\b'
+      - '\bhttpx\.'
+      - '\burlopen\s*\(|\burllib\.request\b|\burllib3\b'
+      - '\baiohttp\.ClientSession\b'
+      - '\bsocket\.(socket|create_connection)\b'
+      - '\b(smtplib|ftplib|paramiko|http\.client)\b'
+      - '\bhttp\.(Get|Post|PostForm|NewRequest|DefaultClient)\b'
+      - '\bnet\.Dial\w*\('
+      - '\b(reqwest|ureq|hyper)::'
+      - '\bURLSession\b|\bNet::HTTP\b'
+      - '(^|[\s;|&(`$"''])(curl|wget|nc|ncat|scp|rsync|ssh)\s'
+      - '/dev/(tcp|udp)/'
+      - 'Invoke-(WebRequest|RestMethod)'
+      - '\bgh\s+(api|gist)\b'
+
+  telemetry:
+    in: [code, config, manifest, lockfile]
+    regex:
+      - '\bposthog\b'
+      - '@segment/|\banalytics-node\b|\brudder-?sdk|\brudderstack\b'
+      - '\bmixpanel\b'
+      - '@amplitude/|\bamplitude\b'
+      - '@sentry/|\bsentry[-_]sdk\b|\bSentry\.init\b|\braven\b'
+      - '@bugsnag/|\bbugsnag\b|\brollbar\b|\bhoneybadger\b'
+      - '\bnewrelic\b|\bdd-trace\b|@datadog/'
+      - '\blogrocket\b|@fullstory/|\bhotjar\b|\bheap-api\b'
+      - '@vercel/analytics|\bplausible\b|\bumami\b|\baptabase\b'
+      - '\bstatsig\b|\blaunchdarkly\b'
+      - '\bapplicationinsights\b|@microsoft/applicationinsights'
+      - '@opentelemetry/exporter|opentelemetry-exporter|OTEL_EXPORTER_OTLP_ENDPOINT'
+      - '@scarf/scarf|\bscarf\.sh\b'
+      - '\buniversal-analytics\b|\bgtag\s*\(|firebase/analytics|getAnalytics\s*\('
+      - '\blangsmith\b|\blangfuse\b|\bhelicone\b|\bbraintrust\b'
+      - '\bcrashReporter\.start\b'
+
+  telemetry-switch:
+    in: [code, config, docs]
+    regex:
+      - '\bDO_NOT_TRACK\b'
+      - '(?i)\b[A-Z_]*(TELEMETRY|ANALYTICS)[A-Z_]*(DISABLED?|OPT_?OUT|OFF|ENABLED?)\b'
+      - '(?i)\btelemetry\s*[:=]\s*(true|false|on|off)\b'
+
+  sensitive-read:
+    in: [code, instructions, config]
+    regex:
+      - '\.ssh/|~/\.ssh\b|id_(rsa|ed25519)'
+      - '\.aws/credentials|\.config/gcloud|\.kube/config|\.docker/config\.json'
+      - '\.netrc\b|\.npmrc\b|\.pypirc\b|\.git-credentials\b'
+      - 'Library/Keychains|security\s+find-(generic|internet)-password|\bkeytar\b|keyring\.get_password'
+      - 'Library/Application Support/(Google/Chrome|BraveSoftware|Firefox|Microsoft Edge|Slack|discord|Signal|Microsoft/Teams|zoom)'
+      - '\b(Login Data|Cookies|Local Storage/leveldb|IndexedDB)\b'
+      - 'Library/Messages|\bchat\.db\b|Library/Mail\b|AddressBook|Library/Calendars'
+      - '\.(zsh|bash)_history\b|\.python_history\b'
+      - '\.claude/(projects|history)|\.claude\.json\b|\.codex/|\.copilot/|\.cursor/'
+      - 'JSON\.stringify\(\s*process\.env\s*\)|\.\.\.process\.env\b|Object\.(keys|entries|assign)\(\s*process\.env'
+      - 'dict\(\s*os\.environ\s*\)|os\.environ\.(copy|items)\(\)|\bprintenv\b|os\.Environ\(\)'
+      - '\b(pbpaste|NSPasteboard|clipboard\.read|readText\(\))'
+      - '\bscreencapture\b|desktopCapturer|getDisplayMedia|CGWindowListCreateImage|ScreenCaptureKit'
+      - 'getUserMedia|AVCaptureDevice|AVAudioRecorder|\bsounddevice\b|\bpyaudio\b'
+      - 'navigator\.geolocation|CoreLocation'
+
+  identifier:
+    in: [code]
+    regex:
+      - '\bos\.(hostname|userInfo|networkInterfaces)\s*\('
+      - '\bgetpass\.getuser\b|\buuid\.getnode\b|\bplatform\.node\b|\bsocket\.gethostname\b'
+      - 'machine-id|IOPlatformUUID|\bnode-machine-id\b|\bmachineIdSync\b'
+      - '\bgit\s+config\s+(--get\s+)?user\.(email|name)\b'
+
+  # AI model SDKs: whatever is passed to them goes to that provider.
+  ai-sdk:
+    in: [code, manifest, lockfile]
+    regex:
+      - '\bfrom\s+["'']openai["'']|\bimport\s+openai\b|\bnew\s+OpenAI\s*\(|\bOpenAI\s*\(|"openai"\s*:'
+      - '@anthropic-ai/sdk|\bimport\s+anthropic\b|\bAnthropic\s*\(|"anthropic"\s*:'
+      - '@google/(generative-ai|genai)|\bgoogle\.genai\b|\bgoogle-genai\b|\bvertexai\b'
+      - '\b(cohere|mistralai|@mistralai/|groq-sdk|together-ai|replicate)\b|@ai-sdk/|\bfrom\s+["'']ai["'']'
+      - '\b(assemblyai|@deepgram/sdk|deepgram-sdk|elevenlabs|speechmatics|rev_ai)\b'
+      - '\b(langchain|@langchain/|llama[-_]?index|litellm)\b'
+
+  remote-storage:
+    in: [code, config, manifest]
+    regex:
+      - '@aws-sdk/client-s3|\bboto3\b|\baws-sdk\b|\bS3Client\b'
+      - '@google-cloud/storage|google\.cloud\.storage|\bfirebase(-admin)?\b|\bfirestore\b'
+      - '@supabase/|\bsupabase\b|\bpocketbase\b|\bappwrite\b|@azure/storage-blob|\bazure-storage\b'
+      - '\bpinecone\b|\bweaviate\b|\bqdrant_client\b|\bupstash\b'
+      - 'mongodb\+srv://|postgres(ql)?://[^\s"''@]+@(?!localhost|127\.|db\b)|mysql://|rediss?://(?!localhost|127\.)'
+      - 'googleapis\.com/(drive|upload)|\bdropbox\b'
+      # Uploads to a model hub (downloads from one are fine)
+      - '\bHfApi\s*\(|\bupload_(file|folder)\s*\(|\bcreate_repo\s*\(|@huggingface/hub'
+
+  synced-folder:
+    in: [code, config]
+    regex:
+      - 'Library/Mobile Documents|Library/CloudStorage|\biCloud\b'
+      - '(~|HOME|homedir\(\))[^\n]{0,20}(Dropbox|OneDrive|Google Drive)'
+
+  remote-code:
+    in: [code, instructions, config]
+    regex:
+      - '(curl|wget)[^|\n]*\|\s*(sudo\s+)?(ba|z)?sh\b'
+      - '\beval\s*\(|\bnew\s+Function\s*\(|\bvm\.runIn\w*Context\s*\('
+      - '\bexec\s*\(\s*(base64|codecs|zlib|marshal|bytes\.fromhex|requests|urlopen)'
+      - '\bimport\s*\(\s*["''`]https?://'
+      - '\b(pickle|marshal)\.loads\s*\('
+      - '\bchild_process\b.*\b(exec|spawn)\w*\s*\(\s*[^"''`]'
+
+  install-hook:
+    in: [manifest, config]
+    regex:
+      - '"(pre|post)?install"\s*:'
+      - '"prepare"\s*:'
+      - '\bcmdclass\s*='
+      - '\[tool\.hatch\.build\.hooks|\bbuild-backend\s*=\s*"(?!setuptools|hatchling|flit_core|poetry\.core|pdm\.backend|maturin|scikit_build_core|uv_build)'
+
+  obfuscation:
+    in: [code, instructions]
+    regex:
+      - '[A-Za-z0-9+/]{120,}={0,2}'
+      - '(\\x[0-9a-fA-F]{2}){12,}'
+      - '(String\.fromCharCode|chr)\s*\(\s*\d+\s*(,\s*\d+\s*){6,}'
+      - '\batob\s*\(|\bBuffer\.from\([^)]*["'']base64["'']|\bb64decode\s*\(|\bbase64\s+(-d|--decode)\b'
+
+  agent-instruction:
+    in: [instructions, code]
+    regex:
+      - '(?i)\b(do not|don''t|never)\s+(tell|inform|mention|show|notify|alert|ask)\b.{0,20}\b(the\s+)?(user|human|owner)'
+      - '(?i)\b(always|also)\s+(include|pass|send|attach|add|put)\b.{0,60}\b(transcripts?|conversation|chat history|emails?|email address(es)?|credentials|tokens?|api keys?|file contents)\b'
+      - '(?i)\beven\s+(if|when|though)\s+the\s+user\s+(did not|didn''t|does not|doesn''t|has not|hasn''t)\s+ask'
+      - '(?i)\bsilently\s+(send|upload|post|sync|run|execute|call|forward|copy|install)\b'
+      - '(?i)\bwithout\s+(asking|telling|notifying|informing)\s+(the\s+)?(user|human|owner)\b'
+
+  # Instructions to an agent to hand data over. Code is left out: error messages match too.
+  send-instruction:
+    in: [instructions]
+    regex:
+      - '(?i)\b(send|post|upload|forward|sync|exfiltrate|email|share|append|copy)\b.{0,40}\b(conversation|transcript|chat history|session history|context window|memory|credentials|tokens?|api keys?|environment variables|\.env|ssh keys?)\b'
+
+  # Text aimed at whoever audits the code.
+  audit-evasion:
+    in: [instructions, docs, code, config]
+    regex:
+      - '(?i)\bignore\s+(all\s+|any\s+)?(previous|prior|above|earlier)\s+instructions'
+      - '(?i)\b(auditor|reviewer|scanner|security review|AI assistant|language model|LLM|claude|copilot|gpt)s?\b[\s\S]{0,160}?\b(report|mark|treat|consider|say|classify|state)\b[\s\S]{0,60}?\b(safe|clean|pass(ed|es)?|no issues|trusted|verified|approved)\b'
+
+  # Characters that hide text from people: zero-width, bidi overrides, Unicode tags.
+  # Left out: joiners (emoji, Persian) and left-to-right/right-to-left marks (Arabic and Hebrew text).
+  # Bidi overrides and isolates stay: they are how Trojan Source hides code. Docs are skipped (READMEs use zero-width spaces to stop autolinks).
+  hidden-text:
+    in: [instructions, code, config]
+    regex:
+      - '[\u200b\u202a-\u202e\u2066-\u2069\U000e0000-\U000e007f]'
+
+  agent-config:
+    in: [config, instructions]
+    regex:
+      # Hook events map to a list of matchers; a translation key with the same word maps to a string.
+      - '"hooks"\s*:|"(UserPromptSubmit|PreToolUse|PostToolUse|SessionStart|SessionEnd|Stop|SubagentStop|Notification|PreCompact)"\s*:\s*\['
+      - '"mcpServers"\s*:|"type"\s*:\s*"(http|sse)"'
+      - '(?i)^allowed-tools\s*:.*\bBash(\(\*\)|\b(?!\())'
+      - '"permissions"\s*:|"allow"\s*:\s*\['
+
+  auto-update:
+    in: [code]
+    regex:
+      - '(?i)\b(check[_-]?for[_-]?updates?|update[_-]?check|autoUpdater|electron-updater|update-notifier)\b'
+
+# Hosts by kind. A domain covers its subdomains; a trailing dot ("telemetry.") matches
+# hosts that start with it. Your profile's trusted_domains and approved_ai_endpoints
+# take precedence over these lists.
+hosts:
+  inert:
+    - localhost
+    - 127.0.0.1
+    - 0.0.0.0
+    - "::1"
+    - example.com
+    - example.org
+    - example.net
+    - w3.org
+    - schema.org
+    - json-schema.org
+    - purl.org
+    - xmlns.com
+    - spdx.org
+    - opensource.org
+    - creativecommons.org
+    - semver.org
+    - keepachangelog.com
+    - conventionalcommits.org
+    - shields.io
+  exfil-risk:
+    - pastebin.com
+    - paste.ee
+    - hastebin.com
+    - ghostbin.co
+    - rentry.co
+    - webhook.site
+    - requestbin.com
+    - requestcatcher.com
+    - beeceptor.com
+    - pipedream.net
+    - ngrok.io
+    - ngrok.app
+    - ngrok-free.app
+    - trycloudflare.com
+    - loca.lt
+    - serveo.net
+    - discord.com
+    - discordapp.com
+    - api.telegram.org
+    - hooks.slack.com
+    - transfer.sh
+    - file.io
+    - 0x0.st
+    - interact.sh
+    - oast.fun
+    - oast.pro
+    - oast.live
+    - burpcollaborator.net
+    - ipinfo.io
+    - ipify.org
+    - ifconfig.me
+    - ip-api.com
+  telemetry:
+    - telemetry.
+    - analytics.
+    - posthog.com
+    - segment.io
+    - segment.com
+    - rudderstack.com
+    - mixpanel.com
+    - amplitude.com
+    - sentry.io
+    - bugsnag.com
+    - rollbar.com
+    - honeybadger.io
+    - newrelic.com
+    - nr-data.net
+    - datadoghq.com
+    - datadoghq.eu
+    - logrocket.com
+    - lr-ingest.io
+    - fullstory.com
+    - hotjar.com
+    - heapanalytics.com
+    - google-analytics.com
+    - analytics.google.com
+    - googletagmanager.com
+    - doubleclick.net
+    - app-measurement.com
+    - plausible.io
+    - umami.is
+    - aptabase.com
+    - statsig.com
+    - statsigapi.net
+    - launchdarkly.com
+    - applicationinsights.azure.com
+    - dc.services.visualstudio.com
+    - scarf.sh
+    - smith.langchain.com
+    - cloud.langfuse.com
+    - helicone.ai
+    - braintrust.dev
+  ai-provider:
+    - openai.com
+    - openai.azure.com
+    - anthropic.com
+    - claude.ai
+    - generativelanguage.googleapis.com
+    - aiplatform.googleapis.com
+    - bedrock-runtime.
+    - mistral.ai
+    - cohere.com
+    - cohere.ai
+    - groq.com
+    - together.xyz
+    - together.ai
+    - openrouter.ai
+    - deepseek.com
+    - x.ai
+    - perplexity.ai
+    - fireworks.ai
+    - replicate.com
+    - api-inference.huggingface.co
+    - router.huggingface.co
+    - huggingface.cloud
+    - assemblyai.com
+    - deepgram.com
+    - elevenlabs.io
+    - rev.ai
+    - speechmatics.com
+    - voyageai.com
+    - ollama.com
+  # Where models are downloaded from. A download sends no data; an upload is remote-storage.
+  model-hub:
+    - huggingface.co
+    - hf.co
+    - registry.ollama.ai
+  # Public CDNs and font hosts: they see your IP address, not your data.
+  cdn:
+    - fonts.googleapis.com
+    - fonts.gstatic.com
+    - cdnjs.cloudflare.com
+    - cdn.jsdelivr.net
+    - unpkg.com
+    - code.jquery.com
+    - cdn.tailwindcss.com
+  cloud-storage:
+    - amazonaws.com
+    - firebaseio.com
+    - firebasestorage.googleapis.com
+    - storage.googleapis.com
+    - supabase.co
+    - blob.core.windows.net
+    - r2.cloudflarestorage.com
+    - pinecone.io
+    - upstash.io
+    - mongodb.net
+    - vercel-storage.com
+    - dropboxapi.com

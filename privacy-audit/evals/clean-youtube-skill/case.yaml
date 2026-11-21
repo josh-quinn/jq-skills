@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: clean-youtube-skill
+context:
+  scaffold_script: place-files.sh
+expected_outcome: |
+  Reads yt-notes without running it and reports Local only: it contacts YouTube (its own service) and the GitHub releases API for a version check, and saves notes to ~/video-notes. The update check is at most a note, and the ko-fi link in the README is not treated as a data destination.
