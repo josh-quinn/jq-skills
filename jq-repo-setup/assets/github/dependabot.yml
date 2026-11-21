@@ -1,0 +1,24 @@
+# One block per ecosystem actually present in the repo. Keep github-actions always. Other
+# ecosystem names: gomod, pip, uv, cargo, gradle, maven, terraform, composer, bundler.
+# Delete the blocks you do not need (Dependabot errors on an ecosystem with no manifest).
+# docker covers Dockerfile base images, not image digests inside workflow files.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      minor-and-patch:
+        update-types: [minor, patch]
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: weekly
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ["*"]

@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: fu-v0-1-0
+context:
+  scaffold_script: place-files.sh
+expected_outcome: |
+  Assesses fu at v0.1.0 (before its badge work) and produces a near-complete passing answer set, catching the docs/ trap and using the user's own statement for the know_* criteria.

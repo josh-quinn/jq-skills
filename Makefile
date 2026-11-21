@@ -1,13 +1,18 @@
-.PHONY: test check link unlink sandbox-smoke hooks
+.PHONY: test check link unlink sandbox-smoke hooks install-shell uninstall-shell
 
 PY = uv run --no-project --with pyyaml --with pytest
 
 test:
-	$(PY) pytest -q privacy-common/tests privacy-sandbox/tests
+	$(PY) pytest -q privacy-common/tests privacy-sandbox/tests openssf-common/tests jq-repo-setup/tests
+	zsh jq-repo-setup/tests/test-git-init-prompt.zsh
+	sh jq-repo-setup/tests/test-install-shell.sh
 
 check: test
 	sh -n scripts/link-skills.sh
 	sh -n scripts/sandbox-smoke.sh
+	sh -n scripts/install-shell.sh
+	zsh -n jq-repo-setup/scripts/git-init-prompt.zsh
+	python3 -c "import ast, sys; ast.parse(open(sys.argv[1]).read())" jq-repo-setup/scripts/check-setup.py
 	@for s in */SKILL.md; do head -1 "$$s" | grep -qx -- '---' || { echo "$$s: no frontmatter"; exit 1; }; done
 	@! LC_ALL=C grep -n '[^ -~]' privacy-common/scripts/signatures.yaml || { echo "signatures.yaml: non-ASCII"; exit 1; }
 
@@ -24,3 +29,10 @@ unlink:
 # Once per clone: Conventional Commits on commit, gitleaks on push.
 hooks:
 	git config core.hooksPath .githooks
+
+# jq-repo-setup's git-init prompt: one marked block in ~/.zshrc that sources the wrapper.
+install-shell:
+	sh scripts/install-shell.sh
+
+uninstall-shell:
+	sh scripts/install-shell.sh --uninstall

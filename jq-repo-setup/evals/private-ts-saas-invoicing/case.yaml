@@ -1,0 +1,10 @@
+schema_version: "1.1"
+name: private-ts-saas-invoicing
+expected_outcome: |
+  A private, GitHub Pro, solo, TypeScript + Postgres saas-b2b repo is scaffolded in a
+  scratch directory. The profile and a target OSPS Baseline level are confirmed, skipped
+  controls are listed with reasons, only free features are used on the private repo,
+  workflows are SHA-pinned and least-privilege, hooks work, SaaS evidence docs and
+  container/AWS pipeline pieces exist, and outward-facing steps are written to a file of
+  commands for the owner instead of being run. The final report states what was verified,
+  skipped, and what the owner must do.

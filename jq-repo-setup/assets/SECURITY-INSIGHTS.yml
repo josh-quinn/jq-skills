@@ -1,0 +1,42 @@
+# OpenSSF Security Insights v2 (https://github.com/ossf/security-insights). Read by the
+# OpenSSF Privateer Baseline scanner and LFX Insights. Validate against the current schema.
+header:
+  schema-version: 2.0.0
+  last-updated: '<YYYY-MM-DD>'
+  last-reviewed: '<YYYY-MM-DD>'
+  url: https://github.com/<OWNER>/<REPO>/blob/main/SECURITY-INSIGHTS.yml
+project:
+  name: <PROJECT>
+  homepage: https://github.com/<OWNER>/<REPO>
+  repositories:
+    - name: <REPO>
+      url: https://github.com/<OWNER>/<REPO>
+      comment: Source code
+  vulnerability-reporting:
+    reports-accepted: true
+    bug-bounty-available: false
+    policy: https://github.com/<OWNER>/<REPO>/blob/main/SECURITY.md
+repository:
+  url: https://github.com/<OWNER>/<REPO>
+  status: active
+  accepts-change-request: true
+  accepts-automated-change-request: true
+  core-team:
+    - name: <MAINTAINER_NAME>
+      primary: true
+  license:
+    url: https://github.com/<OWNER>/<REPO>/blob/main/LICENSE
+    expression: <SPDX-ID>
+  security:
+    assessments:
+      self:
+        comment: <link to docs/security-assessment.md or threat model>
+    tools:
+      - name: gitleaks
+        type: secret-scanning
+        rulesets: [default]
+        integration: {adhoc: false, ci: true, release: false}
+      - name: OSV-Scanner
+        type: SCA
+        rulesets: [default]
+        integration: {adhoc: false, ci: true, release: true}

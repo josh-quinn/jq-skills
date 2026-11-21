@@ -1,0 +1,22 @@
+# What agent skills set up in this repository, and the answers they were given.
+# Agents: read this before setting the repo up again. Don't start over: confirm these answers
+# still hold, run jq-repo-setup's scripts/check-setup.py, and fix only what it reports.
+# Keep it true; update it when a decision changes.
+schema: 1
+setup:
+  skill: jq-repo-setup
+  date: <YYYY-MM-DD>              # last full setup or review
+  visibility: public              # public | private
+  project_type: tool              # tool | library | app | saas-b2b
+  team: solo                      # solo | team
+  github_plan: free               # free | pro | team | enterprise (+ ghas)
+  target: OSPS Baseline level 1, most of level 2, level 3 release integrity
+  security_contact: GitHub private vulnerability reporting
+  decisions: docs/adr/            # where the reasons are written down
+  skipped:                        # controls left out on purpose, with the reason
+    - OSPS-QA-07.01: solo maintainer, no second reviewer
+# badges:                         # added by the openssf-* skills
+#   openssf:
+#     project_id: 12345           # the number in its bestpractices.dev/projects/ URL
+#     level: passing              # passing | silver | gold
+#     date: 2026-01-31
