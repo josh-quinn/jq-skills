@@ -133,5 +133,10 @@ _gip_check() { print "boom"; return 3 }
 out=$(git init -q $tmp/r/m <<< "y" 2>&1); rc=$?
 check "a check that can't run is reported, git still succeeds" '[[ $rc -eq 0 && $out == *"exit 3"* ]]'
 
+# Agent shells keep the `git` function but drop helpers that start with an underscore: git
+# must still run, silently.
+out=$( unfunction _gip_target; git --version 2>&1 ); rc=$?
+check "git still works, silently, when the helpers are missing" '[[ $rc -eq 0 && $out == "git version"* ]]'
+
 print
 (( fails == 0 )) && print "all passed" || { print "$fails failed"; exit 1 }

@@ -26,7 +26,13 @@ second comes before anything is published.
    writes a `gaps.md` skeleton, and, if the project is already on bestpractices.dev, saves its
    current answers to `project.json`. Tell the user where the work folder is. Running `init`
    again refreshes the criteria and `project.json`, and keeps your `gaps.md`.
+   - `init` prints `project_status`: `registered`, `not registered on bestpractices.dev` (a
+     normal state: `"project": null` then means that), or `not looked up`. Say which. (The
+     separate `badge project --repo-url <url>` exits with code 3 when the project isn't
+     registered; expect that and don't treat it as a failure.)
    - Add `--no-lookup` when the user says the project isn't registered or not to look it up.
+   - Dry runs and tests: set `OPENSSF_BADGES_DATA_DIR` to a temp folder (and `JQ_TOOLS_CONFIG`
+     to a temp root) so nothing lands in the real `data_dir` or config.
    - No network: say so and stop. Don't fall back on remembered criteria: the wording,
      flags and the set of criteria change, and an answer to an outdated criterion is wrong.
 3. Read the repository's own rules before changing anything: CONTRIBUTING, AGENTS.md or
@@ -45,7 +51,9 @@ second comes before anything is published.
    check something, mark it unverified. Don't assume it.
 3. Run what you can: the tests (with coverage, if the criterion asks about it), the linters,
    the build. The command and its result are evidence.
-4. Fill in `gaps.md`. Every criterion already has a row; give each a Proposed value:
+4. Fill in `gaps.md`: edit it by hand, it's yours (`init` keeps it; `badge gaps` prints a fresh
+   skeleton if you want to start over). Every criterion already has a row; give each a Proposed
+   value:
    - **Met**: true today. Evidence: a file and line, a setting, a CI job, or a command's output.
    - **Fix**: not true yet, and a repo change would make it true. Say what the change is.
    - **Unmet**: leave unmet, for SHOULD and SUGGESTED only, with the reason. A MUST left Unmet
@@ -76,7 +84,11 @@ pull request. Wait for the answers. Record them in `gaps.md` (e.g. "the user con
 
 ## 3. Answer
 
-1. Write `<work>/answers.yaml`, with an entry for every criterion (format below).
+1. Create `<work>/answers.yaml` with `badge answers --criteria <work>/criteria --level <level>
+   --project <name> --repo-url <url> --out <work>/answers.yaml`: a skeleton with every
+   criterion present and unknown (`?`). It never overwrites a file that exists. Fill in each
+   entry (format below). `?` is the status for Ask items you haven't been able to put to the
+   user: `check` warns about each, and a MUST left `?` blocks the badge.
 2. Justifications are public, under CC-BY-3.0+, and read by people deciding whether to trust
    the project. Write one or two plain sentences, specific to this project: name the file,
    setting or tool, and add a URL to the evidence. The URL is required where the U flag is set

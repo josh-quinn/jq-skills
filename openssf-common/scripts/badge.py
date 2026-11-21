@@ -152,7 +152,8 @@ def load_config() -> dict:
     data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
     defaults = yaml.safe_load(DEFAULT_CONFIG)
     cfg = {**defaults, **data}
-    cfg["data_dir"] = str(Path(str(cfg["data_dir"])).expanduser())
+    # OPENSSF_BADGES_DATA_DIR lets a dry run or test keep its work folders somewhere else.
+    cfg["data_dir"] = str(Path(os.environ.get("OPENSSF_BADGES_DATA_DIR") or str(cfg["data_dir"])).expanduser())
     cfg["config_file"] = str(path)
     return cfg
 
@@ -225,13 +226,16 @@ def init_workdir(project, level, repo_url=None, criteria_from=None, lookup=True,
     (work / "source.json").write_text(json.dumps(source, indent=2) + "\n", encoding="utf-8")
 
     site = None
+    status = "not looked up"
     if lookup and repo_url:
         site = find_project(repo_url)
         if site:
             site = get_project(site["id"])  # the full entry, with every answer
             (work / "project.json").write_text(json.dumps(site, indent=2) + "\n", encoding="utf-8")
+        status = "registered" if site else "not registered on bestpractices.dev"
     elif (work / "project.json").exists():
         site = json.loads((work / "project.json").read_text(encoding="utf-8"))
+        status = "registered"
 
     items = load_criteria(crit, level)
     gaps = work / "gaps.md"
@@ -244,6 +248,7 @@ def init_workdir(project, level, repo_url=None, criteria_from=None, lookup=True,
         "source": source,
         "criteria": {k: counts.get(k, 0) for k in CATEGORIES},
         "project": project_summary(site) if site else None,
+        "project_status": status,
         "gaps": str(gaps),
         "answers": str(work / "answers.yaml"),
         "config_file": cfg["config_file"],
@@ -301,6 +306,19 @@ def render_gaps(items, level, project=None, source=None, name=None) -> str:
         req = c["description"].replace("|", "/")
         req = req if len(req) <= 110 else req[:107] + "..."
         lines.append(f"| {c['key']} | {c['category']} | {flags(c)} | {status} |  |  | {req} |")
+    return "\n".join(lines) + "\n"
+
+
+# --- answers skeleton -----------------------------------------------------
+
+
+def render_answers(items, level, project="", repo_url="", ref="") -> str:
+    """An answers.yaml with every criterion present and unknown, ready to fill in."""
+    lines = [f"level: {level}", f"project: {json.dumps(project)}", f"repo_url: {json.dumps(repo_url or '')}"]
+    lines += [f"criteria_ref: {json.dumps(ref or '')}", "answers:"]
+    for c in items:
+        lines.append(f"  {c['key']}:  # {c['category']} [{flags(c)}] {c['description'][:90]}")
+        lines += ['    status: "?"', '    justification: ""', '    evidence: ""']
     return "\n".join(lines) + "\n"
 
 
@@ -494,6 +512,14 @@ def main(argv=None) -> int:
     p.add_argument("--level", required=True, choices=LEVELS)
     p.add_argument("--project-json", help="the project's saved answers (project.json)")
 
+    p = sub.add_parser("answers", help="write an answers.yaml skeleton with every criterion unknown (never overwrites)")
+    p.add_argument("--criteria", required=True)
+    p.add_argument("--level", required=True, choices=LEVELS)
+    p.add_argument("--project", default="")
+    p.add_argument("--repo-url", default="")
+    p.add_argument("--ref", help="criteria commit (default: read from source.json beside the criteria folder)")
+    p.add_argument("--out", help="write here (refuses if the file exists); default: print")
+
     p = sub.add_parser("check", help="check an answers file against the criteria rules")
     p.add_argument("answers")
     p.add_argument("--criteria", help="criteria folder (default: criteria/ beside the answers file)")
@@ -539,6 +565,21 @@ def main(argv=None) -> int:
     elif args.cmd == "gaps":
         site = json.loads(Path(args.project_json).read_text()) if args.project_json else None
         print(render_gaps(load_criteria(Path(args.criteria), args.level), args.level, site), end="")
+    elif args.cmd == "answers":
+        crit = Path(args.criteria)
+        ref = args.ref
+        src = crit.parent / "source.json"
+        if not ref and src.exists():
+            ref = json.loads(src.read_text(encoding="utf-8")).get("ref", "")
+        text = render_answers(load_criteria(crit, args.level), args.level, args.project, args.repo_url, ref or "")
+        if not args.out:
+            print(text, end="")
+        elif Path(args.out).exists():
+            print(f"{args.out} already exists; not overwriting it", file=sys.stderr)
+            return 2
+        else:
+            Path(args.out).write_text(text, encoding="utf-8")
+            print(f"skeleton written to {args.out}")
     elif args.cmd == "check":
         doc = _load_doc(args.answers)
         level = args.level or doc.get("level")

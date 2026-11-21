@@ -4,6 +4,7 @@ from pathlib import Path
 from urllib.parse import parse_qs, urlsplit
 
 import pytest
+import yaml
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 import badge  # noqa: E402
@@ -120,6 +121,52 @@ def test_init_creates_the_work_dir_and_snapshots_criteria(tmp_path, monkeypatch)
     (work / "gaps.md").write_text("edited")
     badge.init_workdir("my proj", "passing", repo_url=None, criteria_from=FIXTURES, lookup=False)
     assert (work / "gaps.md").read_text() == "edited"
+
+
+def _init_env(tmp_path, monkeypatch):
+    monkeypatch.setenv("JQ_TOOLS_CONFIG", str(tmp_path / "cfg"))
+    monkeypatch.delenv("OPENSSF_BADGES_DATA_DIR", raising=False)
+    (tmp_path / "cfg" / "openssf-badge-skills").mkdir(parents=True)
+    (tmp_path / "cfg" / "openssf-badge-skills" / "config.yaml").write_text(f"data_dir: {tmp_path / 'data'}\n")
+
+
+def test_init_says_whether_the_project_is_registered(tmp_path, monkeypatch):
+    _init_env(tmp_path, monkeypatch)
+    url = "https://github.com/o/r"
+    kw = dict(repo_url=url, criteria_from=FIXTURES)
+    assert badge.init_workdir("p", "passing", lookup=False, **kw)["project_status"] == "not looked up"
+    monkeypatch.setattr(badge, "find_project", lambda u: None)
+    assert badge.init_workdir("p", "passing", **kw)["project_status"] == "not registered on bestpractices.dev"
+    monkeypatch.setattr(badge, "find_project", lambda u: {"id": 7})
+    monkeypatch.setattr(badge, "get_project", lambda i: {"id": i, "name": "p"})
+    out = badge.init_workdir("p", "passing", **kw)
+    assert out["project_status"] == "registered" and out["project"]["id"] == 7
+
+
+def test_data_dir_can_be_overridden_by_an_environment_variable(tmp_path, monkeypatch):
+    _init_env(tmp_path, monkeypatch)
+    monkeypatch.setenv("OPENSSF_BADGES_DATA_DIR", str(tmp_path / "dry"))
+    out = badge.init_workdir("p", "passing", repo_url=None, criteria_from=FIXTURES, lookup=False)
+    assert out["workdir"] == str(tmp_path / "dry" / "p" / "passing")
+    assert not (tmp_path / "data").exists()
+
+
+def test_answers_skeleton_has_every_criterion_as_unknown_and_is_well_formed(criteria_dir):
+    items = badge.load_criteria(criteria_dir, "passing")
+    doc = yaml.safe_load(badge.render_answers(items, "passing", "proj", "https://github.com/o/r", "abc123"))
+    assert doc["level"] == "passing" and doc["project"] == "proj" and doc["criteria_ref"] == "abc123"
+    assert list(doc["answers"]) == keys(items)
+    assert {a["status"] for a in doc["answers"].values()} == {"?"}
+    result = badge.check_answers(items, doc)
+    assert not result["errors"] and len(result["warnings"]) == len(items)
+
+
+def test_answers_command_never_overwrites_an_existing_file(criteria_dir, tmp_path, capsys):
+    out = tmp_path / "answers.yaml"
+    args = ["answers", "--criteria", str(criteria_dir), "--level", "passing", "--out", str(out)]
+    assert badge.main(args) == 0 and "description_good" in out.read_text()
+    out.write_text("mine")
+    assert badge.main(args) == 2 and out.read_text() == "mine"
 
 
 # --- gap table ------------------------------------------------------------
