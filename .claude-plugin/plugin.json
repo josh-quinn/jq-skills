@@ -1,0 +1,9 @@
+{
+  "name": "privacy-audit",
+  "description": "Check a skill, plugin, MCP server, package, desktop app or extension before you trust it with your data: reads the code, traces where personal data goes, and optionally watches it in a Docker sandbox.",
+  "version": "0.1.0",
+  "author": { "name": "Josh Quinn" },
+  "repository": "https://github.com/josh-quinn/privacy-audit-skills",
+  "keywords": ["privacy", "audit", "security", "mcp", "skills"],
+  "skills": ["./privacy-audit", "./privacy-sandbox", "./privacy-common"]
+}

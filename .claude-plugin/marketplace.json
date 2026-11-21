@@ -1,0 +1,12 @@
+{
+  "name": "privacy-audit-skills",
+  "owner": { "name": "Josh Quinn" },
+  "plugins": [
+    {
+      "name": "privacy-audit",
+      "source": "./",
+      "description": "Check a tool before you trust it with your data: static audit plus an optional Docker sandbox.",
+      "version": "0.1.0"
+    }
+  ]
+}

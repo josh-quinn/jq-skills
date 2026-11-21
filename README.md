@@ -42,6 +42,15 @@ Install all three together; the other two read `privacy-common` from beside thei
 
 ## Install
 
+As a Claude Code plugin (installs all three skills together):
+
+```sh
+/plugin marketplace add josh-quinn/privacy-audit-skills
+/plugin install privacy-audit --marketplace josh-quinn/privacy-audit-skills
+```
+
+From a clone, for development:
+
 ```sh
 make link     # symlinks each skill into ~/.claude/skills and ~/.copilot/skills
 make unlink   # removes those links
