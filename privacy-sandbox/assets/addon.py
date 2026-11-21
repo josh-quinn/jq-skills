@@ -53,7 +53,10 @@ class Sandbox:
     def __init__(self):
         self.allow = [d.strip().lower() for d in os.environ.get("SANDBOX_ALLOW", "").split(",") if d.strip()]
         path = os.environ.get("SANDBOX_CANARIES_FILE")
-        self.canaries = json.load(open(path)) if path and os.path.exists(path) else {}
+        self.canaries = {}
+        if path and os.path.exists(path):
+            with open(path) as f:
+                self.canaries = json.load(f)
         self.log_path = os.environ.get("SANDBOX_LOG", "/logs/flows.jsonl")
 
     def log(self, **entry):

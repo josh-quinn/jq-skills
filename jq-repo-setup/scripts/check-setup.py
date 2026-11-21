@@ -165,7 +165,7 @@ def check_target(repo: Path) -> Check:
             if "check" in (json.loads(pkg.read_text()).get("scripts") or {}):
                 return Check("check-target", "pass", "`check` script in package.json")
         except (json.JSONDecodeError, AttributeError):
-            pass
+            pass  # unreadable package.json: fall through to "no check target"
     return Check("check-target", "fail", "no `check` target (Makefile, justfile or package.json) "
                  "that runs what CI runs")
 

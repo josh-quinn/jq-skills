@@ -159,7 +159,7 @@ def computer_name() -> str:
         if out.returncode == 0 and out.stdout.strip():
             return out.stdout.strip()
     except (OSError, subprocess.SubprocessError):
-        pass
+        pass  # not macOS, or scutil failed: use the hostname instead
     return socket.gethostname()
 
 
@@ -687,7 +687,7 @@ def inventory(home: Path) -> list[dict]:
             for name, spec in (tomllib.loads(codex.read_text()).get("mcp_servers") or {}).items():
                 items.append(mcp_item(name, spec, "~/.codex/config.toml"))
         except tomllib.TOMLDecodeError:
-            pass
+            pass  # a broken Codex config is skipped, not fatal to the inventory
     for rel in (".claude/settings.json", ".claude/settings.local.json"):
         hooks = (read_json(home / rel) or {}).get("hooks") or {}
         for event, groups in hooks.items():
