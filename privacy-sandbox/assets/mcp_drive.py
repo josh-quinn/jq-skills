@@ -38,7 +38,9 @@ def fill(schema: dict, text: str):
 
 class Client:
     def __init__(self, cmd: list[str], timeout: float):
-        self.proc = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=sys.stderr)
+        # Unbuffered, so select() sees every line: a buffered reader can hold a second line that
+        # select() never reports, and the call would wait out its timeout.
+        self.proc = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=sys.stderr, bufsize=0)
         self.timeout, self.next_id = timeout, 1
 
     def send(self, msg: dict):

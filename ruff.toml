@@ -1,0 +1,14 @@
+# Lint for the Python in this repo: `make lint`, part of `make check`.
+target-version = "py311"
+extend-exclude = ["docs/openssf-handoff", "**/evals/*/files"]  # a historical scratch script; planted fixtures
+
+[lint]
+select = ["E", "F", "W", "B", "S", "UP"]
+ignore = [
+  "E501",  # line length is left to the author
+  "S603",  # these tools exist to run subprocesses; arguments are always lists, never a shell string
+  "S607",  # git, docker and similar are found on PATH on purpose
+]
+
+[lint.per-file-ignores]
+"**/tests/**" = ["S101", "S108"]  # asserts are the point of a test; "/tmp/..." there is just a string

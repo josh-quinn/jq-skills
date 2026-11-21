@@ -323,7 +323,7 @@ def check_openssf_badge(repo: Path, note: dict | None, fetch) -> Check:
 
 
 def _fetch(url: str):
-    req = Request(url, headers={"Accept": "application/json", "User-Agent": "check-setup"})
+    req = Request(url, headers={"Accept": "application/json", "User-Agent": "check-setup"})  # noqa: S310 - fixed https URL
     with urlopen(req, timeout=15) as r:  # noqa: S310 - fixed https URL
         return json.load(r)
 
