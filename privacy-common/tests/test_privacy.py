@@ -451,7 +451,9 @@ def test_cli_init_makes_a_work_folder(capsys, tmp_path, config_root):
 
 def test_cli_classify_reports_each_host(capsys):
     out = run_cli(capsys, "classify", "us.i.posthog.com", "api.openai.com", "--own", "example.com")
-    assert "profile personal" in out and "us.i.posthog.com" in out and "api.openai.com" in out
+    header, *rows = out.splitlines()
+    assert header.startswith("profile personal")
+    assert [row.split()[-1] for row in rows] == ["us.i.posthog.com", "api.openai.com"]
 
 
 def test_cli_scan_prints_text_and_json(capsys, tmp_path):
