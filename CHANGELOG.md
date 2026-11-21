@@ -4,13 +4,20 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow [SemVer
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-21
+
 ### Changed
 
-- Every skill folder, and so every skill name, now carries the `jq-` prefix: `jq-privacy-audit`,
-  `jq-privacy-sandbox`, `jq-privacy-common`, `jq-openssf-passing`, `jq-openssf-common` (alongside
-  the existing `jq-repo-setup`). Re-run `make link` to replace the old links in `~/.claude/skills`
-  and `~/.copilot/skills`, and reinstall plugin or `npx skills` installs of 0.1.0 to pick up the
-  new names.
+- **Breaking:** every skill folder, and so every skill name, now carries the `jq-` prefix:
+  `jq-privacy-audit`, `jq-privacy-sandbox`, `jq-privacy-common`, `jq-openssf-passing`,
+  `jq-openssf-common` (alongside the existing `jq-repo-setup`). To upgrade from 0.1.0:
+  - from a clone, re-run `make link` after removing the old links from `~/.claude/skills` and
+    `~/.copilot/skills` (`make link` never overwrites a link it didn't make);
+  - for plugin or `npx skills` installs, reinstall to pick up the new names;
+  - if your `~/.config/jq-tools/git-init-prompt/config.yaml` lists `openssf-passing`, change it to
+    `jq-openssf-passing`.
+  Config directories (`~/.config/jq-tools/privacy-audit/` and so on) and the marketplace plugin
+  names are unchanged.
 
 ## [0.1.0] - 2026-11-21
 
@@ -37,5 +44,6 @@ First release. The repository is public under the MIT licence.
 - The git-init prompt printed `_gip_target: command not found` in shells that keep `git` but not
   its helper functions.
 
-[Unreleased]: https://github.com/josh-quinn/jq-skills/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/josh-quinn/jq-skills/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/josh-quinn/jq-skills/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/josh-quinn/jq-skills/releases/tag/v0.1.0
