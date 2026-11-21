@@ -4,6 +4,14 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow [SemVer
 
 ## [Unreleased]
 
+### Changed
+
+- Every skill folder, and so every skill name, now carries the `jq-` prefix: `jq-privacy-audit`,
+  `jq-privacy-sandbox`, `jq-privacy-common`, `jq-openssf-passing`, `jq-openssf-common` (alongside
+  the existing `jq-repo-setup`). Re-run `make link` to replace the old links in `~/.claude/skills`
+  and `~/.copilot/skills`, and reinstall plugin or `npx skills` installs of 0.1.0 to pick up the
+  new names.
+
 ## [0.1.0] - 2026-11-21
 
 First release. The repository is public under the MIT licence.

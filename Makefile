@@ -3,13 +3,13 @@
 PY = uv run --no-project --with pyyaml --with pytest
 
 test:
-	$(PY) pytest -q privacy-common/tests privacy-sandbox/tests openssf-common/tests jq-repo-setup/tests
+	$(PY) pytest -q jq-privacy-common/tests jq-privacy-sandbox/tests jq-openssf-common/tests jq-repo-setup/tests
 	zsh jq-repo-setup/tests/test-git-init-prompt.zsh
 	sh jq-repo-setup/tests/test-install-shell.sh
 
 # Line coverage of the helper scripts (the number to quote for the OpenSSF test_most criterion).
 coverage:
-	uv run -q --no-project --with pyyaml --with pytest --with pytest-cov pytest -q privacy-common/tests privacy-sandbox/tests openssf-common/tests jq-repo-setup/tests --cov=privacy-common/scripts --cov=privacy-sandbox/scripts --cov=privacy-sandbox/assets --cov=openssf-common/scripts --cov=jq-repo-setup/scripts --cov-report=term
+	uv run -q --no-project --with pyyaml --with pytest --with pytest-cov pytest -q jq-privacy-common/tests jq-privacy-sandbox/tests jq-openssf-common/tests jq-repo-setup/tests --cov=jq-privacy-common/scripts --cov=jq-privacy-sandbox/scripts --cov=jq-privacy-sandbox/assets --cov=jq-openssf-common/scripts --cov=jq-repo-setup/scripts --cov-report=term
 	@rm -f .coverage
 
 lint:
@@ -22,7 +22,7 @@ check: test lint
 	zsh -n jq-repo-setup/scripts/git-init-prompt.zsh
 	python3 -c "import ast, sys; ast.parse(open(sys.argv[1]).read())" jq-repo-setup/scripts/check-setup.py
 	@for s in */SKILL.md; do head -1 "$$s" | grep -qx -- '---' || { echo "$$s: no frontmatter"; exit 1; }; done
-	@! LC_ALL=C grep -n '[^ -~]' privacy-common/scripts/signatures.yaml || { echo "signatures.yaml: non-ASCII"; exit 1; }
+	@! LC_ALL=C grep -n '[^ -~]' jq-privacy-common/scripts/signatures.yaml || { echo "signatures.yaml: non-ASCII"; exit 1; }
 
 # Runs a planted leaky package in a real sandbox (needs Docker); nothing leaves the machine.
 sandbox-smoke:

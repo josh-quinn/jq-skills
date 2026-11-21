@@ -19,7 +19,7 @@ done
 path=($tmp/bin $path)
 
 # Fake skill folders.
-for s in jq-repo-setup openssf-passing; do
+for s in jq-repo-setup jq-openssf-passing; do
   mkdir -p $tmp/skills/$s && print -- "---\nname: $s\n---" > $tmp/skills/$s/SKILL.md
 done
 
@@ -33,7 +33,7 @@ write_cfg() {  # agent [enabled]
 agent: $1
 skills:
   - jq-repo-setup
-  - openssf-passing
+  - jq-openssf-passing
   - not-installed
 skill_dirs:
   - $tmp/skills" > $cfg
@@ -55,11 +55,11 @@ check "existing config is not rewritten" "grep -q '^# mine' $cfg"
 # 2. Yes with a fixed agent starts it in the new repo with each skill's SKILL.md.
 reset; write_cfg claude
 out=$(git init -q $tmp/r/b <<< "y" 2>&1)
-check "the question names every skill in order" '[[ $out == *"with jq-repo-setup, then openssf-passing?"* ]]'
+check "the question names every skill in order" '[[ $out == *"with jq-repo-setup, then jq-openssf-passing?"* ]]'
 check "claude is started" "grep -q '^agent=claude' $tmp/called"
 check "agent runs in the new repo" "grep -qx 'cwd=${tmp:A}/r/b' $tmp/called"
-check "prompt names jq-repo-setup first, then openssf-passing" \
-  "grep '^arg=' $tmp/called | head -1 | grep -q 'jq-repo-setup/SKILL.md.*openssf-passing/SKILL.md'"
+check "prompt names jq-repo-setup first, then jq-openssf-passing" \
+  "grep '^arg=' $tmp/called | head -1 | grep -q 'jq-repo-setup/SKILL.md.*jq-openssf-passing/SKILL.md'"
 check "skill folder is added for the agent" "grep -qx 'arg=${tmp:A}/skills' $tmp/called"
 check "a skill that isn't installed is skipped and reported" '[[ $out == *not-installed* ]] && ! grep -q not-installed/SKILL $tmp/called'
 

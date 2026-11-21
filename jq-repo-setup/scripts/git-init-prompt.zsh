@@ -27,7 +27,7 @@ agent: ask
 # Skills to run, in order, by folder name. Each is looked up in skill_dirs; missing ones are skipped.
 skills:
   - jq-repo-setup
-  - openssf-passing
+  - jq-openssf-passing
 skill_dirs:
   - ~/.claude/skills
   - ~/.copilot/skills" > $cfg

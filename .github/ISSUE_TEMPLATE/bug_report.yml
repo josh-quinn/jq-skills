@@ -21,7 +21,7 @@ body:
     id: version
     attributes:
       label: Version
-      description: The git commit of this repo, and which skill (privacy-audit, privacy-sandbox or privacy-common)
+      description: The git commit of this repo, and which skill (jq-privacy-audit, jq-privacy-sandbox or jq-privacy-common)
     validations:
       required: true
   - type: input

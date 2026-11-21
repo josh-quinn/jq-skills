@@ -8,9 +8,9 @@ Rules for coding agents are in [AGENTS.md](AGENTS.md).
 - **Test first** for `privacy.py` and `sandbox.py`. Tests use `JQ_TOOLS_CONFIG` and
   `tmp_path`, never the network, Docker or the real config.
 - **Small, single-purpose commits** written as [Conventional Commits](https://www.conventionalcommits.org/)
-  (`feat(privacy-audit): ...`, `fix(privacy-common): ...`). A `commit-msg` hook and CI enforce this.
+  (`feat(jq-privacy-audit): ...`, `fix(jq-privacy-common): ...`). A `commit-msg` hook and CI enforce this.
 - **Decisions** that are hard to reverse get an ADR in [`docs/adr/`](docs/adr) in the same change.
-- **Skills stay generic** and shared material lives once in `privacy-common/`.
+- **Skills stay generic** and shared material lives once in `jq-privacy-common/`.
 - **Never write into `~/.claude/skills`**; use `make link`.
 
 ## Getting started

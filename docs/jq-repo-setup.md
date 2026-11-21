@@ -15,7 +15,7 @@ speaks up in an interactive terminal, so scripts and agents' own shells never se
 - **New repo**: asks whether to set it up, and with which agent, then starts that agent in the
   repo with a prompt to follow each skill's `SKILL.md` in turn:
 
-      Set up myproject with jq-repo-setup, then openssf-passing? [y/N]
+      Set up myproject with jq-repo-setup, then jq-openssf-passing? [y/N]
       Which agent?  1) Claude Code  2) Copilot CLI  3) Antigravity  [1]
 
 - **Re-init** (git says "Reinitialized existing Git repository"):
