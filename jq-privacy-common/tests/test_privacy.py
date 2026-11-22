@@ -15,6 +15,7 @@ import privacy  # noqa: E402
 @pytest.fixture(autouse=True)
 def config_root(tmp_path, monkeypatch):
     root = tmp_path / "jq-tools"
+    monkeypatch.delenv("TOOLS_CONFIG", raising=False)
     monkeypatch.setenv("JQ_TOOLS_CONFIG", str(root))
     monkeypatch.delenv("PRIVACY_AUDIT_PROFILE", raising=False)
     monkeypatch.setattr(privacy, "computer_name", lambda: "Sams-MacBook")
@@ -29,6 +30,16 @@ def write(base: Path, rel: str, text: str) -> Path:
 
 
 # --- config and profiles ----------------------------------------------------
+
+
+def test_tools_config_moves_the_config_root_and_beats_the_older_variable(tmp_path, monkeypatch):
+    monkeypatch.setenv("JQ_TOOLS_CONFIG", str(tmp_path / "old"))
+    assert privacy.config_path() == tmp_path / "old" / "privacy-audit" / "config.yaml"
+    monkeypatch.setenv("TOOLS_CONFIG", str(tmp_path / "new"))
+    assert privacy.config_path() == tmp_path / "new" / "privacy-audit" / "config.yaml"
+    monkeypatch.delenv("TOOLS_CONFIG")
+    monkeypatch.delenv("JQ_TOOLS_CONFIG")
+    assert privacy.config_path() == Path("~/.config/jq-tools").expanduser() / "privacy-audit" / "config.yaml"
 
 
 def test_first_run_writes_default_config(config_root):

@@ -31,7 +31,7 @@ second comes before anything is published.
      separate `badge project --repo-url <url>` exits with code 3 when the project isn't
      registered; expect that and don't treat it as a failure.)
    - Add `--no-lookup` when the user says the project isn't registered or not to look it up.
-   - Dry runs and tests: set `OPENSSF_BADGES_DATA_DIR` to a temp folder (and `JQ_TOOLS_CONFIG`
+   - Dry runs and tests: set `OPENSSF_BADGES_DATA_DIR` to a temp folder (and `TOOLS_CONFIG`
      to a temp root) so nothing lands in the real `data_dir` or config.
    - No network: say so and stop. Don't fall back on remembered criteria: the wording,
      flags and the set of criteria change, and an answer to an outdated criterion is wrong.

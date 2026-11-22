@@ -11,7 +11,7 @@ One repo for all the owner's agent skills. Each skill is a top-level folder with
    the user's settings live in their config, and skills defer to the target repo's rules and
    the user's own instructions.
 4. **`make check` passes at every commit.** Tests sit beside the code (`<skill>/tests/`), use
-   `JQ_TOOLS_CONFIG` and `tmp_path`, and never touch the network, Docker or the real config.
+   `TOOLS_CONFIG` and `tmp_path`, and never touch the network, Docker or the real config.
    Write the test first for `privacy.py`, `sandbox.py`, `badge.py` and `check-setup.py`.
 5. **Small Conventional Commits, one purpose each.** Ask the owner before outward-facing
    actions (pushing, publishing, anything on bestpractices.dev). Run `make hooks` once per

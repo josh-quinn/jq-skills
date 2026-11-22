@@ -140,7 +140,8 @@ def flags(c: dict) -> str:
 
 
 def config_path() -> Path:
-    root = os.environ.get("JQ_TOOLS_CONFIG") or "~/.config/jq-tools"
+    # TOOLS_CONFIG moves the config root; JQ_TOOLS_CONFIG is the older name, still honoured.
+    root = os.environ.get("TOOLS_CONFIG") or os.environ.get("JQ_TOOLS_CONFIG") or "~/.config/jq-tools"
     return Path(root).expanduser() / TOOL / "config.yaml"
 
 

@@ -5,7 +5,7 @@ Rules for coding agents are in [AGENTS.md](AGENTS.md).
 
 ## Ground rules
 
-- **Test first** for `privacy.py` and `sandbox.py`. Tests use `JQ_TOOLS_CONFIG` and
+- **Test first** for `privacy.py` and `sandbox.py`. Tests use `TOOLS_CONFIG` and
   `tmp_path`, never the network, Docker or the real config.
 - **Small, single-purpose commits** written as [Conventional Commits](https://www.conventionalcommits.org/)
   (`feat(jq-privacy-audit): ...`, `fix(jq-privacy-common): ...`). A `commit-msg` hook and CI enforce this.

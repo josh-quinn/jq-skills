@@ -27,5 +27,5 @@ Run the helper as `uv run --no-project --with pyyaml python -I <this folder>/scr
 `~/.config/jq-tools/openssf-badge-skills/config.yaml` is created with defaults on first run and
 never rewritten. `data_dir` sets where the work folders go (default
 `~/development/openssf-badges`), and `max_url_length` sets where proposal URLs are split. Set
-`JQ_TOOLS_CONFIG` to another root to keep tests away from the real settings, and
+`TOOLS_CONFIG` to another root to keep tests away from the real settings, and
 `OPENSSF_BADGES_DATA_DIR` to override `data_dir` for one run (dry runs, tests).

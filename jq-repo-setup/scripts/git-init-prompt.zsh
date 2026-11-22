@@ -7,13 +7,14 @@
 #   re-init, with that setup record   run check-setup.py; offer an agent only if something fails
 #
 # Source it from ~/.zshrc (scripts/install-shell.sh does that). Settings:
-#   ${JQ_TOOLS_CONFIG:-~/.config/jq-tools}/git-init-prompt/config.yaml (written on first use)
+#   ${TOOLS_CONFIG:-~/.config/jq-tools}/git-init-prompt/config.yaml (written on first use; the older
+#   JQ_TOOLS_CONFIG is still honoured)
 #   JQ_GIT_INIT_PROMPT=off   don't ask (e.g. for one command: JQ_GIT_INIT_PROMPT=off git init)
 
 _gip_skill_home=${${(%):-%x}:A:h:h}   # this skill's folder, through any symlink
 
 _gip_config() {
-  print -r -- "${JQ_TOOLS_CONFIG:-$HOME/.config/jq-tools}/git-init-prompt/config.yaml"
+  print -r -- "${TOOLS_CONFIG:-${JQ_TOOLS_CONFIG:-$HOME/.config/jq-tools}}/git-init-prompt/config.yaml"
 }
 
 _gip_write_default() {
@@ -160,7 +161,7 @@ _gip_offer() {
     done
     if [[ -n $d ]]; then found+=($d); else missing+=($s); fi
   done
-  (( ${#missing} )) && print -u2 "git-init-prompt: skipping skills not found in skill_dirs: ${(j:, :)missing}"
+  (( ${#missing} )) && print -u2 "git-init-prompt: skipping skills not found in skill_dirs: ${(j:, :)missing}. Follow-up: install them from the same place as jq-repo-setup (its plugin marketplace, or npx skills add <that repository>), then run them."
   (( ${#found} )) || return 0
 
   local -a names=(${found:t})
