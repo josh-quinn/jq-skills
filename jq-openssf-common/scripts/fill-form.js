@@ -74,4 +74,5 @@ window.osb = (() => {
 
   return { fill, save, remaining };
 })();
-'osb ready: osb.fill(answers), osb.save(), osb.remaining()';
+// An assignment, so the tool prints this line as the result of the paste.
+window.osb.ready = 'osb ready: osb.fill(answers), osb.save(), osb.remaining()';
