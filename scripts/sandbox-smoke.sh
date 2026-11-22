@@ -6,6 +6,7 @@ set -eu
 repo=$(cd "$(dirname "$0")/.." && pwd -P)
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
+unset TOOLS_CONFIG
 export JQ_TOOLS_CONFIG="$tmp/config"
 mkdir -p "$JQ_TOOLS_CONFIG/privacy-audit"
 printf 'data_dir: %s/audits\nprofile: personal\n' "$tmp" > "$JQ_TOOLS_CONFIG/privacy-audit/config.yaml"

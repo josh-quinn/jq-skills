@@ -12,6 +12,11 @@ import badge  # noqa: E402
 FIXTURES = Path(__file__).parent / "fixtures"
 
 
+@pytest.fixture(autouse=True)
+def no_real_tools_config(monkeypatch):
+    monkeypatch.delenv("TOOLS_CONFIG", raising=False)
+
+
 @pytest.fixture
 def criteria_dir(tmp_path):
     d = tmp_path / "criteria"
@@ -96,6 +101,16 @@ def test_config_is_created_with_defaults_under_the_override_root(tmp_path, monke
     path = tmp_path / "cfg" / "openssf-badge-skills" / "config.yaml"
     assert path.exists()
     assert cfg["data_dir"] == str(Path("~/development/openssf-badges").expanduser())
+
+
+def test_tools_config_moves_the_config_root_and_beats_the_older_variable(tmp_path, monkeypatch):
+    monkeypatch.setenv("JQ_TOOLS_CONFIG", str(tmp_path / "old"))
+    assert badge.config_path() == tmp_path / "old" / "openssf-badge-skills" / "config.yaml"
+    monkeypatch.setenv("TOOLS_CONFIG", str(tmp_path / "new"))
+    assert badge.config_path() == tmp_path / "new" / "openssf-badge-skills" / "config.yaml"
+    monkeypatch.delenv("TOOLS_CONFIG")
+    monkeypatch.delenv("JQ_TOOLS_CONFIG")
+    assert badge.config_path() == Path("~/.config/jq-tools").expanduser() / "openssf-badge-skills" / "config.yaml"
 
 
 def test_config_written_by_the_user_is_read_and_never_rewritten(tmp_path, monkeypatch):

@@ -41,7 +41,7 @@ never rewritten by the skills. It holds `data_dir` (default `~/development/priva
 the `work` and `personal` profiles (`trusted_domains`, `approved_ai_endpoints`,
 `own_service: trusted | confirm`), `work_computer_names` for picking the work profile
 automatically, and optional extra `signatures`. `PRIVACY_AUDIT_PROFILE=work|personal`
-overrides the profile for one run; `JQ_TOOLS_CONFIG` moves the config root (tests use it).
+overrides the profile for one run; `TOOLS_CONFIG` moves the config root (tests use it).
 
 ## References
 

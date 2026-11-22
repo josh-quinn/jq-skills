@@ -90,5 +90,7 @@ jobs:
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version: stable
+      # Sends package names and versions to api.osv.dev. With internal package names (private or
+      # employer repos) add: --offline-vulnerabilities --download-offline-databases
       - name: Scan lockfiles for known vulnerabilities
         run: go run github.com/google/osv-scanner/v2/cmd/osv-scanner@v2.7.1 scan source --recursive .

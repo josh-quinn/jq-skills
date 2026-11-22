@@ -23,6 +23,7 @@ for s in jq-repo-setup jq-openssf-passing; do
   mkdir -p $tmp/skills/$s && print -- "---\nname: $s\n---" > $tmp/skills/$s/SKILL.md
 done
 
+unset TOOLS_CONFIG
 export JQ_TOOLS_CONFIG=$tmp/cfg JQ_GIT_INIT_PROMPT=always
 cfg=$JQ_TOOLS_CONFIG/git-init-prompt/config.yaml
 source $here/../scripts/git-init-prompt.zsh
@@ -62,6 +63,7 @@ check "prompt names jq-repo-setup first, then jq-openssf-passing" \
   "grep '^arg=' $tmp/called | head -1 | grep -q 'jq-repo-setup/SKILL.md.*jq-openssf-passing/SKILL.md'"
 check "skill folder is added for the agent" "grep -qx 'arg=${tmp:A}/skills' $tmp/called"
 check "a skill that isn't installed is skipped and reported" '[[ $out == *not-installed* ]] && ! grep -q not-installed/SKILL $tmp/called'
+check "  ...and the report says how to get it" '[[ $out == *"Follow-up: install them from the same place as jq-repo-setup"* ]]'
 
 # 3. No means nothing is started; git's result is kept.
 reset; write_cfg claude
@@ -137,6 +139,11 @@ check "a check that can't run is reported, git still succeeds" '[[ $rc -eq 0 && 
 # must still run, silently.
 out=$( unfunction _gip_target; git --version 2>&1 ); rc=$?
 check "git still works, silently, when the helpers are missing" '[[ $rc -eq 0 && $out == "git version"* ]]'
+
+# TOOLS_CONFIG moves the config root and beats the older JQ_TOOLS_CONFIG.
+check "config root: the older variable still works" '[[ $(_gip_config) == "$tmp/cfg/git-init-prompt/config.yaml" ]]'
+check "config root: TOOLS_CONFIG wins" '[[ $(TOOLS_CONFIG=$tmp/new _gip_config) == "$tmp/new/git-init-prompt/config.yaml" ]]'
+check "config root: the default is ~/.config/jq-tools" '[[ $(unset TOOLS_CONFIG JQ_TOOLS_CONFIG; HOME=$tmp/h _gip_config) == "$tmp/h/.config/jq-tools/git-init-prompt/config.yaml" ]]'
 
 print
 (( fails == 0 )) && print "all passed" || { print "$fails failed"; exit 1 }

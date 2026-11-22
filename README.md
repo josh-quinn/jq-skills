@@ -47,7 +47,7 @@ with PyYAML). The privacy sandbox needs Docker (Docker Desktop or OrbStack).
 ## Configuration
 
 Config for each tool lives in `~/.config/jq-tools/<tool>/config.yaml`, created on first use and
-never rewritten. Set `JQ_TOOLS_CONFIG` to use another root, as the tests do.
+never rewritten. Set `TOOLS_CONFIG` to use another root, as the tests do (`JQ_TOOLS_CONFIG` still works as the older name).
 
 ## Develop
 

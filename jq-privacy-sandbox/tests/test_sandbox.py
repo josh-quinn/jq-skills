@@ -17,6 +17,7 @@ import sandbox  # noqa: E402
 
 @pytest.fixture(autouse=True)
 def config_root(tmp_path, monkeypatch):
+    monkeypatch.delenv("TOOLS_CONFIG", raising=False)
     monkeypatch.setenv("JQ_TOOLS_CONFIG", str(tmp_path / "jq-tools"))
     monkeypatch.delenv("PRIVACY_AUDIT_PROFILE", raising=False)
 
