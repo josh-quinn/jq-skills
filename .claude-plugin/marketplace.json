@@ -12,7 +12,7 @@
       "source": "./",
       "strict": false,
       "description": "Check a tool before you trust it with your data: static audit plus an optional Docker sandbox.",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "skills": [
         "./jq-privacy-audit",
         "./jq-privacy-sandbox",
@@ -24,7 +24,7 @@
       "source": "./",
       "strict": false,
       "description": "Set up or harden a repository with engineering, security and supply-chain practices using free and open-source tooling.",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "skills": [
         "./jq-repo-setup"
       ]
@@ -34,7 +34,7 @@
       "source": "./",
       "strict": false,
       "description": "Take a project to the OpenSSF Best Practices badges honestly (passing level so far).",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "skills": [
         "./jq-openssf-common",
         "./jq-openssf-passing"

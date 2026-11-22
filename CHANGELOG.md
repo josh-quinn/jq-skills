@@ -4,6 +4,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow [SemVer
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-22
+
+The project earned the OpenSSF Best Practices passing badge.
+
 ### Added
 
 - `jq-repo-setup` asks who owns the code and which licence (never a default; "none yet" is
@@ -12,11 +16,20 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow [SemVer
 - `jq-repo-setup/references/tooling.md` lists what each tool sends out (dependency names to
   OSV, TruffleHog's verification, published Scorecard results, public transparency logs, SaaS
   tools) and the offline or local options.
+- `docs/README.md` covers installing, using and securely using the skills.
+- The OpenSSF Best Practices passing badge in the README, recorded in `.github/repo-setup.yaml`.
 
 ### Changed
 
 - `TOOLS_CONFIG` moves the config root (default `~/.config/jq-tools`); `JQ_TOOLS_CONFIG` is still
   honoured as the older name.
+- SECURITY.md no longer says there are no releases; CONTRIBUTING.md states that new functionality
+  gets tests.
+
+### Fixed
+
+- `jq-openssf-common/scripts/fill-form.js` ended with a bare string that CodeQL flagged as a useless
+  expression; it is now an assignment with the same result.
 
 ## [0.2.0] - 2026-11-21
 
@@ -58,6 +71,7 @@ First release. The repository is public under the MIT licence.
 - The git-init prompt printed `_gip_target: command not found` in shells that keep `git` but not
   its helper functions.
 
-[Unreleased]: https://github.com/josh-quinn/jq-skills/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/josh-quinn/jq-skills/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/josh-quinn/jq-skills/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/josh-quinn/jq-skills/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/josh-quinn/jq-skills/releases/tag/v0.1.0
