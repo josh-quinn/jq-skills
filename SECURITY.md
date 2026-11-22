@@ -2,7 +2,9 @@
 
 ## Supported versions
 
-Only the latest commit on `main` is supported. There are no releases yet.
+Only the latest release and the latest commit on `main` are supported. Releases are listed on
+the [releases page](https://github.com/josh-quinn/jq-skills/releases) and described in
+[CHANGELOG.md](CHANGELOG.md).
 
 ## Reporting a vulnerability
 
