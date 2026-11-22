@@ -64,6 +64,17 @@ in one short batch for anything you cannot infer:
 7. **Process appetite**: does the owner want spec-driven development (e.g. spec-kit) and
    ADRs from day one? Default: ADRs yes; spec-kit only if they ask or the project is
    long-lived.
+8. **Licence and ownership**: ask who owns the code (the user, an employer or a client) and
+   which licence, every time. Never choose one, and never write a LICENSE file the user has not
+   named: a licence committed to a version or release is hard to take back, and the wrong one
+   can give away work an employer owns. If an employer owns it, company policy decides (often
+   legal or an open-source program office), and internal repos usually carry a proprietary
+   "all rights reserved, internal use" notice rather than an open-source licence. Offer three
+   answers: an OSI-approved licence the user names (public repos), a proprietary or
+   internal-use notice (the user supplies the owner and the wording), or none yet. "None yet"
+   is a valid answer: write no LICENSE, leave the licence block out of `SECURITY-INSIGHTS.yml`,
+   and list "choose a licence" as a follow-up (a public repo without one is visible but not
+   reusable).
 
 Write back a 4-6 line summary of the profile and what you will set up, and get a yes
 before creating files. That summary is the contract for the rest of the work; record it
@@ -93,8 +104,8 @@ Order matters: protections that stop mistakes (secret scanning, hooks) go in bef
 first real push; settings that block merging go in last, once CI is green, or the owner
 locks themselves out.
 
-1. **Foundations**: README (what, install, use), LICENSE (public: OSI-approved, ask
-   which; private: proprietary notice or none), CONTRIBUTING, SECURITY, CODE_OF_CONDUCT
+1. **Foundations**: README (what, install, use), LICENSE (only the one the user chose in
+   Step 1; if they chose none yet, none), CONTRIBUTING, SECURITY, CODE_OF_CONDUCT
    (public), CHANGELOG, `.gitignore`, `.editorconfig`, CODEOWNERS, issue and PR templates,
    ADR folder with template and index, a short `CLAUDE.md`/`AGENTS.md` stating the project
    rules for coding agents. Templates are in `assets/` - adapt names, contacts, commands;
@@ -161,6 +172,22 @@ Report faithfully: what is in place, what was verified and how, what was skipped
 why, and what needs the owner (e.g. registering at bestpractices.dev, creating a tap
 repo or a token, pushing release tags, approving setting changes).
 
+**Sibling skills are follow-ups, not assumptions.** This skill points to others (the OpenSSF
+badge skill, `jq-openssf-passing`, once a public repo is ready for the badge). Check whether
+each is installed (`~/.claude/skills`, `~/.copilot/skills`). If not, don't improvise its work
+and don't skip it silently: end the report with a follow-up saying which skill is missing, why
+it matters here, and how to get it (install it from the same place this skill came from: the
+plugin marketplace or `npx skills add <that repository>`), then to run it.
+
+## What leaves the machine (private and employer repos)
+
+Some of the tools above call public services. Before adding any to a private or employer
+repo, read the "What each tool sends out" section of `references/tooling.md`, tell the user in
+the Step 1 summary what each chosen tool sends, and prefer the offline or local option, or drop
+the tool, where the repo's dependency names or contents shouldn't leave. Never turn on a
+setting that publishes results (Scorecard's `publish_results`, a public transparency log) for
+a private repo without the user's explicit go-ahead.
+
 ## Lessons that cost real time (read before building releases)
 
 `references/lessons.md` has the details. The short version:
@@ -196,7 +223,7 @@ repo or a token, pushing release tags, approving setting changes).
   `--json` for a machine-readable list of failures, `--offline` to skip GitHub and the badge.
 - `scripts/git-init-prompt.zsh` - optional zsh wrapper around `git init`. On a new repo it
   offers to start Claude Code, Copilot CLI or Antigravity with this skill (and any others listed
-  in `~/.config/jq-tools/git-init-prompt/config.yaml`); on a re-init it runs the check and
+  in `${TOOLS_CONFIG:-~/.config/jq-tools}/git-init-prompt/config.yaml`); on a re-init it runs the check and
   offers an agent only for what failed. Not part of a setup run; mention it only if the user
   asks to be offered setup on every repo.
 - `assets/repo-setup.yaml` - the template for the setup record.

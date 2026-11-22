@@ -103,3 +103,27 @@ SARIF only if code scanning is available; otherwise fail the job on findings.
 | release-please (Google OSS) | release PRs + CHANGELOG from Conventional Commits; good for libraries and long-lived apps |
 | GoReleaser (OSS edition) | Go binaries, archives, Homebrew casks, SBOMs, signing |
 | cargo-dist, PyPI trusted publishing, npm provenance (`npm publish --provenance`) | per-ecosystem releases with provenance |
+
+## What each tool sends out
+
+Most tools here run entirely on the runner or the laptop. These do not, so check them before
+using one on a private or employer repo.
+
+| Tool | Sends | For a private repo |
+|---|---|---|
+| OSV-Scanner (`scan source`) | package names and versions from every lockfile, to `api.osv.dev` (Google) | fine if every dependency is public; with internal package names use `--offline-vulnerabilities --download-offline-databases` (queries a local copy of the database) |
+| `npm audit`, `pip-audit`, `cargo audit`, `govulncheck` | dependency names and versions to the ecosystem's registry or advisory service (govulncheck: the Go vulnerability database; it sends module paths) | same: public dependencies only, or use an internal registry |
+| TruffleHog with verification | each credential it finds, to the service that issued it, to test whether it is live | only when the user accepts that live-check; otherwise run unverified |
+| Scorecard action with `publish_results: true` | the results, to the public OpenSSF API | public repos only; never enable for a private repo without a go-ahead |
+| Sigstore cosign, slsa-github-generator | artifact hashes and identity, to the public Rekor log | public by design, even for a private repo |
+| StepSecurity harden-runner | the runner's network and process activity, to StepSecurity's service | a third-party SaaS: not for repos whose build traffic shouldn't leave |
+| Renovate (hosted app) | repository contents, to Mend | use Dependabot, or self-host |
+| Opengrep | nothing, with `--metrics=off` (the template sets it); rules are fetched from GitHub at a pinned commit | fine |
+| gitleaks, actionlint, zizmor, hadolint, Trivy, Syft, shellcheck, ruff and the other linters | nothing about the repo (Trivy downloads its vulnerability database; tool binaries and modules are fetched from their registries) | fine |
+| CodeQL, Dependabot, dependency-review, secret scanning | stay inside GitHub | fine; some need GitHub Code Security / Secret Protection on private repos |
+
+Trust: prefer tools with a well-known steward (GitHub, Google, OpenSSF, Linux Foundation,
+OWASP, CNCF, Anchore, Aqua, a long-lived single maintainer such as actionlint) and pin them by
+commit SHA, digest or checksum, as the templates do. Opengrep is the newest and least
+established tool in the catalogue (a community fork of Semgrep CE); if the user's organisation
+has an approved-tools list, use that list instead (CodeQL or the language linters).

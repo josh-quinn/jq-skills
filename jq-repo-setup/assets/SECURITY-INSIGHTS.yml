@@ -24,7 +24,7 @@ repository:
   core-team:
     - name: <MAINTAINER_NAME>
       primary: true
-  license:
+  license:  # only if the owner chose a licence and a LICENSE file exists; otherwise delete this block
     url: https://github.com/<OWNER>/<REPO>/blob/main/LICENSE
     expression: <SPDX-ID>
   security:
