@@ -4,6 +4,20 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versions follow [SemVer
 
 ## [Unreleased]
 
+### Added
+
+- `jq-repo-setup` asks who owns the code and which licence (never a default; "none yet" is
+  allowed and becomes a follow-up), and reports a missing sibling skill as a follow-up with where
+  to get it.
+- `jq-repo-setup/references/tooling.md` lists what each tool sends out (dependency names to
+  OSV, TruffleHog's verification, published Scorecard results, public transparency logs, SaaS
+  tools) and the offline or local options.
+
+### Changed
+
+- `TOOLS_CONFIG` moves the config root (default `~/.config/jq-tools`); `JQ_TOOLS_CONFIG` is still
+  honoured as the older name.
+
 ## [0.2.0] - 2026-11-21
 
 ### Changed
