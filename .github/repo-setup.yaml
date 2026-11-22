@@ -16,8 +16,8 @@ setup:
   skipped:
     - OSPS-QA-07.01: solo maintainer, no second reviewer
     - release signing and SBOM: nothing is released
-# badges:                         # added by the openssf-* skills
-#   openssf:
-#     project_id: 12345           # the number in its bestpractices.dev/projects/ URL
-#     level: passing              # passing | silver | gold
-#     date: 2026-01-31
+badges:                           # added by the openssf-* skills
+  openssf:
+    project_id: 17004             # the number in its bestpractices.dev/projects/ URL
+    level: passing                # passing | silver | gold
+    date: 2026-11-22

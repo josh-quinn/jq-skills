@@ -1,5 +1,7 @@
 # jq-skills
 
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/17004/badge)](https://www.bestpractices.dev/projects/17004)
+
 My agent skills for Claude Code, GitHub Copilot and other agents that read `SKILL.md`. Each
 skill is a top-level folder; skills that share material read a `*-common` folder from beside
 their own, so install a group together.
