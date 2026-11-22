@@ -15,7 +15,7 @@ setup:
   decisions: docs/adr/            # where the reasons are written down
   skipped:
     - OSPS-QA-07.01: solo maintainer, no second reviewer
-    - release signing and SBOM: nothing is released
+    - release signing and SBOM: releases are source-only tags (nothing is built or distributed as a package)
 badges:                           # added by the openssf-* skills
   openssf:
     project_id: 17004             # the number in its bestpractices.dev/projects/ URL
